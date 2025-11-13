@@ -12,6 +12,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Properties from "./pages/Properties";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import VideoEditor from "./pages/VideoEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/properties" element={<Properties />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/about" element={<About />} />
+              <Route path="/video-editor" element={<VideoEditor />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

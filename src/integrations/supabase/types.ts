@@ -187,6 +187,51 @@ export type Database = {
         }
         Relationships: []
       }
+      video_uploads: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: number
+          id: string
+          original_filename: string
+          output_path: string | null
+          permission_confirmed: boolean
+          status: string
+          transformations: Json | null
+          updated_at: string
+          uploader_email: string | null
+          uploader_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size: number
+          id?: string
+          original_filename: string
+          output_path?: string | null
+          permission_confirmed?: boolean
+          status?: string
+          transformations?: Json | null
+          updated_at?: string
+          uploader_email?: string | null
+          uploader_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          original_filename?: string
+          output_path?: string | null
+          permission_confirmed?: boolean
+          status?: string
+          transformations?: Json | null
+          updated_at?: string
+          uploader_email?: string | null
+          uploader_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

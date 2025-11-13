@@ -26,6 +26,9 @@ const Navigation = () => {
             <Link to="/properties" className="text-foreground hover:text-primary transition-colors">
               Properties
             </Link>
+            <Link to="/video-editor" className="text-foreground hover:text-primary transition-colors">
+              Video Editor
+            </Link>
             <Link to="/about" className="text-foreground hover:text-primary transition-colors">
               About
             </Link>
@@ -78,6 +81,13 @@ const Navigation = () => {
               onClick={() => setIsOpen(false)}
             >
               Properties
+            </Link>
+            <Link
+              to="/video-editor"
+              className="block py-2 text-foreground hover:text-primary transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Video Editor
             </Link>
             <Link
               to="/about"
