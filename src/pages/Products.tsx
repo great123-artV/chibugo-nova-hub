@@ -124,54 +124,56 @@ const ProductsPage = () => {
             <p className="text-muted-foreground text-lg">No products found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-medium transition-shadow">
-                <CardHeader className="p-0">
+              <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group">
+                <CardHeader className="p-0 border-b">
                   <div className="aspect-square bg-muted relative overflow-hidden">
                     {product.images?.[0] ? (
                       <img 
                         src={product.images[0]} 
                         alt={product.name} 
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center bg-secondary/30">
                         {product.type === "laptop" ? (
-                          <Laptop className="w-20 h-20 text-muted-foreground" />
+                          <Laptop className="w-20 h-20 text-muted-foreground/60" />
                         ) : (
-                          <Smartphone className="w-20 h-20 text-muted-foreground" />
+                          <Smartphone className="w-20 h-20 text-muted-foreground/60" />
                         )}
                       </div>
                     )}
                     {product.stock <= 5 && product.stock > 0 && (
-                      <Badge className="absolute top-2 right-2" variant="destructive">
+                      <Badge className="absolute top-3 right-3" variant="destructive">
                         Low Stock
                       </Badge>
                     )}
                     {product.stock === 0 && (
-                      <Badge className="absolute top-2 right-2" variant="destructive">
+                      <Badge className="absolute top-3 right-3" variant="outline" style={{backgroundColor: 'white'}}>
                         Out of Stock
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <Badge variant="secondary" className="mb-2">
-                    {product.type === "laptop" ? "Laptop" : "Phone"}
+                <CardContent className="p-4 flex-grow">
+                  <Badge variant="secondary" className="mb-2 capitalize">
+                    {product.type}
                   </Badge>
                   {product.brand && (
-                    <p className="text-sm text-muted-foreground mb-1">{product.brand}</p>
+                    <p className="text-sm text-muted-foreground mb-1 font-medium">{product.brand}</p>
                   )}
                   <h3 className="font-semibold text-lg mb-2 line-clamp-2">{product.name}</h3>
-                  <p className="text-2xl font-bold text-primary">
-                    ₦{product.price.toLocaleString()}
-                  </p>
                 </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Button asChild className="w-full">
-                    <Link to={`/product/${product.id}`}>View Details</Link>
-                  </Button>
+                <CardFooter className="p-4 pt-0 mt-auto">
+                  <div className="w-full">
+                    <p className="text-2xl font-bold text-primary mb-4">
+                      ₦{product.price.toLocaleString()}
+                    </p>
+                    <Button asChild className="w-full">
+                      <Link to={`/product/${product.id}`}>View Details</Link>
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
