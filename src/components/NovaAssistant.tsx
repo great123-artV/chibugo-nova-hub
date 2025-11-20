@@ -196,24 +196,33 @@ export function NovaAssistant() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-lg p-3 break-words ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                </div>
-              </div>
-            ))}
+            {messages.map((message, index) => {
+              if (message.role === "user") {
+                return (
+                  <div key={index} className="flex justify-end">
+                    <div className="max-w-[85%] rounded-lg p-3 break-words bg-primary text-primary-foreground">
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    </div>
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={index} className="flex items-start gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                      AI
+                    </div>
+                    <div className="w-fit max-w-[85%] rounded-lg p-3 break-words bg-muted text-foreground">
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    </div>
+                  </div>
+                );
+              }
+            })}
             {isLoading && (
-              <div className="flex justify-start">
+              <div className="flex items-end gap-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                  AI
+                </div>
                 <div className="bg-muted rounded-lg p-3">
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>

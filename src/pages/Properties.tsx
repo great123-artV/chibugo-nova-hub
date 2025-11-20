@@ -1,8 +1,62 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Home, Construction } from "lucide-react";
+import { MapPin, Bed, Bath, Car, ArrowRight } from "lucide-react";
 import heroRealEstate from "@/assets/hero-realestate.jpg";
+
+// Mock Data for Properties
+const properties = [
+  {
+    id: "prop1",
+    title: "Luxury Villa in Lekki Phase 1",
+    price: "₦350,000,000",
+    location: "Lekki, Lagos",
+    bedrooms: 5,
+    bathrooms: 5,
+    parking: 3,
+    type: "sale",
+    imageUrl: "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    status: "Available"
+  },
+  {
+    id: "prop2",
+    title: "Modern 2-Bedroom Apartment",
+    price: "₦5,000,000 / year",
+    location: "Ikeja GRA, Lagos",
+    bedrooms: 2,
+    bathrooms: 2,
+    parking: 1,
+    type: "rent",
+    imageUrl: "https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    status: "New"
+  },
+  {
+    id: "prop3",
+    title: "Spacious Office Space",
+    price: "₦15,000,000 / year",
+    location: "Victoria Island, Lagos",
+    bedrooms: 0,
+    bathrooms: 2,
+    parking: 5,
+    type: "commercial",
+    imageUrl: "https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    status: "Available"
+  },
+  {
+    id: "prop4",
+    title: "Cozy Family Duplex",
+    price: "₦180,000,000",
+    location: "Surulere, Lagos",
+    bedrooms: 4,
+    bathrooms: 4,
+    parking: 2,
+    type: "sale",
+    imageUrl: "https://images.pexels.com/photos/208736/pexels-photo-208736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    status: "Hot Deal"
+  },
+  // Add more properties as needed
+];
 
 const PropertiesPage = () => {
   return (
@@ -10,7 +64,7 @@ const PropertiesPage = () => {
       <div className="container mx-auto px-4">
         {/* Header with Image */}
         <div 
-          className="relative h-[300px] rounded-xl mb-8 overflow-hidden"
+          className="relative h-[300px] rounded-xl mb-12 overflow-hidden"
           style={{
             backgroundImage: `url(${heroRealEstate})`,
             backgroundSize: 'cover',
@@ -27,57 +81,56 @@ const PropertiesPage = () => {
           </div>
         </div>
 
-        {/* Coming Soon Section */}
-        <Card className="max-w-3xl mx-auto shadow-medium">
-          <CardContent className="pt-12 pb-12 text-center">
-            <div className="mb-6">
-              <Construction className="w-24 h-24 text-primary mx-auto mb-4" />
-              <h2 className="text-3xl font-bold mb-4">Phase 2: Coming Soon</h2>
-              <p className="text-lg text-muted-foreground mb-6">
-                We're expanding our services to include comprehensive real estate solutions. 
-                Our property listings will feature residential and commercial properties for rent and sale.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="p-4">
-                <Home className="w-12 h-12 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">Residential</h3>
-                <p className="text-sm text-muted-foreground">
-                  Houses, apartments, and land
-                </p>
-              </div>
-              <div className="p-4">
-                <Home className="w-12 h-12 text-accent mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">Commercial</h3>
-                <p className="text-sm text-muted-foreground">
-                  Office spaces and shops
-                </p>
-              </div>
-              <div className="p-4">
-                <Home className="w-12 h-12 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">Investment</h3>
-                <p className="text-sm text-muted-foreground">
-                  Prime investment properties
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-muted-foreground">
-                Interested in real estate? Contact us to discuss your needs.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg">
-                  <Link to="/contact">Contact Real Estate Team</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <a href="tel:07045024855">Call: 07045024855</a>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Property Listings */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {properties.map((property) => (
+            <Card key={property.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+              <CardHeader className="p-0 relative">
+                <div className="aspect-w-16 aspect-h-9" style={{ position: 'relative', overflow: 'hidden' }}>
+                  <img
+                    src={property.imageUrl}
+                    alt={property.title}
+                    className="object-cover w-full h-full"
+                    style={{ position: 'absolute', top: 0, left: 0 }}
+                  />
+                </div>
+                <Badge
+                  className="absolute top-3 right-3 capitalize"
+                  variant={property.status === "Hot Deal" ? "destructive" : "default"}
+                >
+                  {property.status}
+                </Badge>
+              </CardHeader>
+              <CardContent className="p-4 flex-grow">
+                <Badge variant="secondary" className="mb-2 capitalize">{property.type}</Badge>
+                <h3 className="text-xl font-semibold mb-2 line-clamp-2">{property.title}</h3>
+                <div className="flex items-center text-muted-foreground mb-4">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span className="text-sm">{property.location}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4">
+                  {property.type !== 'commercial' && (
+                    <div className="flex items-center gap-4">
+                      <span className="flex items-center"><Bed className="w-4 h-4 mr-1" /> {property.bedrooms}</span>
+                      <span className="flex items-center"><Bath className="w-4 h-4 mr-1" /> {property.bathrooms}</span>
+                      <span className="flex items-center"><Car className="w-4 h-4 mr-1" /> {property.parking}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="p-4 pt-0 mt-auto">
+                 <div className="w-full">
+                    <p className="text-2xl font-bold text-primary mb-4">{property.price}</p>
+                    <Button asChild className="w-full">
+                      <Link to="#">
+                        View Details <ArrowRight className="w-4 h-4 ml-2" />
+                      </Link>
+                    </Button>
+                 </div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
