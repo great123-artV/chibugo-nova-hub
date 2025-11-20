@@ -19,7 +19,9 @@ export default function VideoEditor() {
   const [uploaderEmail, setUploaderEmail] = useState("");
   const [permissionConfirmed, setPermissionConfirmed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedVideoId, setUploadedVideoId] = useState<string | null>(null);
+  const [processedVideoPath, setProcessedVideoPath] = useState<string | null>(null);
   
   // Transformation options
   const [trimStart, setTrimStart] = useState(0);
@@ -108,10 +110,11 @@ export default function VideoEditor() {
       exportPreset,
     };
 
-    toast.info("Processing video... This may take a few minutes.");
+    setIsProcessing(true);
+    toast.info("Processing video with FFmpeg... This may take a few minutes.");
 
     try {
-      const { error } = await supabase.functions.invoke("process-video", {
+      const { data, error } = await supabase.functions.invoke("process-video", {
         body: {
           videoId: uploadedVideoId,
           transformations,
@@ -120,10 +123,43 @@ export default function VideoEditor() {
 
       if (error) throw error;
 
-      toast.success("Video processing started! You'll be notified when it's ready.");
+      setProcessedVideoPath(data.outputPath);
+      toast.success("Video processed successfully! You can now download it.");
     } catch (error) {
       console.error("Processing error:", error);
       toast.error("Failed to process video. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!processedVideoPath) {
+      toast.error("No processed video available");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from("videos")
+        .download(processedVideoPath);
+
+      if (error) throw error;
+
+      // Create download link
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `processed-video-${Date.now()}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Video downloaded successfully!");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download video. Please try again.");
     }
   };
 
@@ -361,12 +397,32 @@ export default function VideoEditor() {
 
                     <Button
                       onClick={handleProcessVideo}
-                      disabled={!uploadedVideoId}
+                      disabled={!uploadedVideoId || isProcessing}
                       className="w-full"
                     >
-                      <Download className="mr-2 h-4 w-4" />
-                      Process & Export Video
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing Video...
+                        </>
+                      ) : (
+                        <>
+                          <Video className="mr-2 h-4 w-4" />
+                          Process Video
+                        </>
+                      )}
                     </Button>
+
+                    {processedVideoPath && (
+                      <Button
+                        onClick={handleDownload}
+                        variant="outline"
+                        className="w-full mt-2"
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Processed Video
+                      </Button>
+                    )}
                   </TabsContent>
                 </Tabs>
               </CardContent>
