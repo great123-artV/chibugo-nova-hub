@@ -88,10 +88,12 @@ const ProductsPage = () => {
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Our Products</h1>
-          <p className="text-muted-foreground">
-            Browse our selection of quality laptops and smartphones
+        <div className="mb-12 text-center">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Premium Tech Products
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Browse our selection of quality laptops and smartphones with competitive prices
           </p>
         </div>
 
@@ -124,16 +126,16 @@ const ProductsPage = () => {
             <p className="text-muted-foreground text-lg">No products found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group">
-                <CardHeader className="p-0 border-b">
+              <Card key={product.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group border-border/50">
+                <CardHeader className="p-0">
                   <div className="aspect-square bg-muted relative overflow-hidden">
                     {product.images?.[0] ? (
                       <img 
                         src={product.images[0]} 
                         alt={product.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500 bg-white"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-secondary/30">
@@ -145,32 +147,34 @@ const ProductsPage = () => {
                       </div>
                     )}
                     {product.stock <= 5 && product.stock > 0 && (
-                      <Badge className="absolute top-3 right-3" variant="destructive">
+                      <Badge className="absolute top-3 right-3 shadow-lg" variant="destructive">
                         Low Stock
                       </Badge>
                     )}
                     {product.stock === 0 && (
-                      <Badge className="absolute top-3 right-3" variant="outline" style={{backgroundColor: 'white'}}>
+                      <Badge className="absolute top-3 right-3 shadow-lg bg-background" variant="outline">
                         Out of Stock
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="p-4 flex-grow">
-                  <Badge variant="secondary" className="mb-2 capitalize">
+                <CardContent className="p-5 flex-grow border-t">
+                  <Badge variant="secondary" className="mb-3 capitalize text-xs px-3 py-1">
                     {product.type}
                   </Badge>
                   {product.brand && (
-                    <p className="text-sm text-muted-foreground mb-1 font-medium">{product.brand}</p>
+                    <p className="text-sm text-primary mb-2 font-semibold uppercase tracking-wide">{product.brand}</p>
                   )}
-                  <h3 className="font-semibold text-lg mb-2 line-clamp-2">{product.name}</h3>
+                  <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                    {product.name}
+                  </h3>
                 </CardContent>
-                <CardFooter className="p-4 pt-0 mt-auto">
+                <CardFooter className="p-5 pt-0 mt-auto">
                   <div className="w-full">
-                    <p className="text-2xl font-bold text-primary mb-4">
+                    <p className="text-3xl font-bold text-primary mb-4">
                       ₦{product.price.toLocaleString()}
                     </p>
-                    <Button asChild className="w-full">
+                    <Button asChild className="w-full group-hover:shadow-lg transition-shadow">
                       <Link to={`/product/${product.id}`}>View Details</Link>
                     </Button>
                   </div>

@@ -1,136 +1,207 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Car, ArrowRight } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { MapPin, Bed, Bath, Car, ArrowRight, Search, Home } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import heroRealEstate from "@/assets/hero-realestate.jpg";
 
-// Mock Data for Properties
-const properties = [
-  {
-    id: "prop1",
-    title: "Luxury Villa in Lekki Phase 1",
-    price: "₦350,000,000",
-    location: "Lekki, Lagos",
-    bedrooms: 5,
-    bathrooms: 5,
-    parking: 3,
-    type: "sale",
-    imageUrl: "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    status: "Available"
-  },
-  {
-    id: "prop2",
-    title: "Modern 2-Bedroom Apartment",
-    price: "₦5,000,000 / year",
-    location: "Ikeja GRA, Lagos",
-    bedrooms: 2,
-    bathrooms: 2,
-    parking: 1,
-    type: "rent",
-    imageUrl: "https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    status: "New"
-  },
-  {
-    id: "prop3",
-    title: "Spacious Office Space",
-    price: "₦15,000,000 / year",
-    location: "Victoria Island, Lagos",
-    bedrooms: 0,
-    bathrooms: 2,
-    parking: 5,
-    type: "commercial",
-    imageUrl: "https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    status: "Available"
-  },
-  {
-    id: "prop4",
-    title: "Cozy Family Duplex",
-    price: "₦180,000,000",
-    location: "Surulere, Lagos",
-    bedrooms: 4,
-    bathrooms: 4,
-    parking: 2,
-    type: "sale",
-    imageUrl: "https://images.pexels.com/photos/208736/pexels-photo-208736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    status: "Hot Deal"
-  },
-  // Add more properties as needed
-];
+interface Property {
+  id: string;
+  title: string;
+  price: number;
+  location: string | null;
+  property_type: string | null;
+  type: string | null;
+  images: string[];
+  description: string | null;
+  featured: boolean | null;
+}
 
 const PropertiesPage = () => {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  useEffect(() => {
+    filterProperties();
+  }, [properties, typeFilter, searchTerm]);
+
+  const fetchProperties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load properties",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterProperties = () => {
+    let filtered = [...properties];
+
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(p => p.type === typeFilter);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(p => 
+        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.location?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredProperties(filtered);
+  };
+
+  const formatPrice = (price: number, type: string | null) => {
+    const formatted = `₦${price.toLocaleString()}`;
+    if (type === "rent") return `${formatted} / year`;
+    return formatted;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading properties...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
         {/* Header with Image */}
         <div 
-          className="relative h-[300px] rounded-xl mb-12 overflow-hidden"
+          className="relative h-[400px] rounded-2xl mb-12 overflow-hidden shadow-2xl"
           style={{
             backgroundImage: `url(${heroRealEstate})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent flex items-end">
-            <div className="p-8">
-              <h1 className="text-4xl font-bold mb-2">Real Estate</h1>
-              <p className="text-muted-foreground text-lg">
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent flex items-end">
+            <div className="p-8 w-full">
+              <h1 className="text-5xl font-bold mb-3">Premium Real Estate</h1>
+              <p className="text-muted-foreground text-xl mb-6">
                 Quality properties for rent and sale in prime locations
               </p>
             </div>
           </div>
         </div>
 
+        {/* Filters */}
+        <div className="mb-8 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+            <Input
+              placeholder="Search properties by title or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full md:w-[200px]">
+              <SelectValue placeholder="Property Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Properties</SelectItem>
+              <SelectItem value="sale">For Sale</SelectItem>
+              <SelectItem value="rent">For Rent</SelectItem>
+              <SelectItem value="commercial">Commercial</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Property Listings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
-              <CardHeader className="p-0 relative">
-                <div className="aspect-w-16 aspect-h-9" style={{ position: 'relative', overflow: 'hidden' }}>
-                  <img
-                    src={property.imageUrl}
-                    alt={property.title}
-                    className="object-cover w-full h-full"
-                    style={{ position: 'absolute', top: 0, left: 0 }}
-                  />
-                </div>
-                <Badge
-                  className="absolute top-3 right-3 capitalize"
-                  variant={property.status === "Hot Deal" ? "destructive" : "default"}
-                >
-                  {property.status}
-                </Badge>
-              </CardHeader>
-              <CardContent className="p-4 flex-grow">
-                <Badge variant="secondary" className="mb-2 capitalize">{property.type}</Badge>
-                <h3 className="text-xl font-semibold mb-2 line-clamp-2">{property.title}</h3>
-                <div className="flex items-center text-muted-foreground mb-4">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  <span className="text-sm">{property.location}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4">
-                  {property.type !== 'commercial' && (
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center"><Bed className="w-4 h-4 mr-1" /> {property.bedrooms}</span>
-                      <span className="flex items-center"><Bath className="w-4 h-4 mr-1" /> {property.bathrooms}</span>
-                      <span className="flex items-center"><Car className="w-4 h-4 mr-1" /> {property.parking}</span>
+        {filteredProperties.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg">No properties found</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredProperties.map((property) => (
+              <Card key={property.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group border-border/50">
+                <CardHeader className="p-0 relative">
+                  <div className="aspect-video relative overflow-hidden bg-muted">
+                    {property.images?.[0] ? (
+                      <img
+                        src={property.images[0]}
+                        alt={property.title}
+                        className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-secondary/30">
+                        <Home className="w-20 h-20 text-muted-foreground/60" />
+                      </div>
+                    )}
+                    {property.featured && (
+                      <Badge className="absolute top-3 right-3 capitalize bg-primary shadow-lg" variant="default">
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5 flex-grow">
+                  <Badge variant="secondary" className="mb-3 capitalize text-xs px-3 py-1">
+                    {property.type || "For Sale"}
+                  </Badge>
+                  <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                    {property.title}
+                  </h3>
+                  {property.location && (
+                    <div className="flex items-center text-muted-foreground mb-3">
+                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-sm">{property.location}</span>
                     </div>
                   )}
-                </div>
-              </CardContent>
-              <CardFooter className="p-4 pt-0 mt-auto">
-                 <div className="w-full">
-                    <p className="text-2xl font-bold text-primary mb-4">{property.price}</p>
-                    <Button asChild className="w-full">
+                  {property.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4 border-t pt-3">
+                      {property.description}
+                    </p>
+                  )}
+                </CardContent>
+                <CardFooter className="p-5 pt-0 mt-auto">
+                  <div className="w-full">
+                    <p className="text-3xl font-bold text-primary mb-4">
+                      {formatPrice(property.price, property.type)}
+                    </p>
+                    <Button asChild className="w-full group-hover:shadow-lg transition-shadow">
                       <Link to="#">
-                        View Details <ArrowRight className="w-4 h-4 ml-2" />
+                        View Details <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </Button>
-                 </div>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -207,7 +207,7 @@ export function NovaAssistant() {
                 );
               } else {
                 return (
-                  <div key={index} className="flex items-start gap-2">
+                  <div key={index} className="flex items-start gap-2 ml-1">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                       AI
                     </div>
@@ -219,7 +219,7 @@ export function NovaAssistant() {
               }
             })}
             {isLoading && (
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-2 ml-1">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                   AI
                 </div>
