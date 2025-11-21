@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { MessageCircle, X, Send, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TypingIndicator } from "./TypingIndicator";
 
 type Message = {
   role: "user" | "assistant";
@@ -136,13 +137,14 @@ export function NovaAssistant() {
 
       if (error) throw error;
 
+      const assistantMessage = data.message.replace(/\*/g, "");
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.message },
+        { role: "assistant", content: assistantMessage },
       ]);
       
       // Auto-speak the response
-      speakText(data.message);
+      speakText(assistantMessage);
     } catch (error) {
       console.error("Nova chat error:", error);
       toast.error("Failed to get response from Nova. Please try again.");
@@ -164,10 +166,11 @@ export function NovaAssistant() {
       )}
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[500px] flex flex-col shadow-2xl z-50 border-2">
-          <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Card className="w-full max-w-[600px] h-[90vh] mx-4 flex flex-col shadow-2xl border-2 rounded-lg">
+            <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
               <div>
                 <h3 className="font-semibold">Nova AI Assistant</h3>
                 <p className="text-xs opacity-90">Always here to help</p>
@@ -224,7 +227,7 @@ export function NovaAssistant() {
                   AI
                 </div>
                 <div className="bg-muted rounded-lg p-3">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <TypingIndicator />
                 </div>
               </div>
             )}
@@ -244,7 +247,7 @@ export function NovaAssistant() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
                 disabled={isLoading || isListening}
-                className="flex-1"
+                className="flex-1 pl-4"
               />
               <Button 
                 type="button" 
@@ -266,6 +269,7 @@ export function NovaAssistant() {
             )}
           </div>
         </Card>
+      </div>
       )}
     </>
   );
