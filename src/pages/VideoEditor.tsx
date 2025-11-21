@@ -1,27 +1,25 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Video, Download, Loader2, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Upload, Video, Download, Loader2, Play } from "lucide-react";
 import { toast } from "sonner";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
 export default function VideoEditor() {
   const [file, setFile] = useState<File | null>(null);
-  const [uploaderName, setUploaderName] = useState("");
-  const [uploaderEmail, setUploaderEmail] = useState("");
-  const [permissionConfirmed, setPermissionConfirmed] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadedVideoId, setUploadedVideoId] = useState<string | null>(null);
-  const [processedVideoPath, setProcessedVideoPath] = useState<string | null>(null);
+  const [isFFmpegLoaded, setIsFFmpegLoaded] = useState(false);
+  const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
+  const [processingProgress, setProcessingProgress] = useState(0);
   
   // Transformation options
   const [trimStart, setTrimStart] = useState(0);
@@ -33,6 +31,38 @@ export default function VideoEditor() {
   const [exportPreset, setExportPreset] = useState("youtube");
   const [watermarkText, setWatermarkText] = useState("Chibugo Computers");
 
+  const ffmpegRef = useRef(new FFmpeg());
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    loadFFmpeg();
+  }, []);
+
+  const loadFFmpeg = async () => {
+    const ffmpeg = ffmpegRef.current;
+    
+    ffmpeg.on("log", ({ message }) => {
+      console.log(message);
+    });
+
+    ffmpeg.on("progress", ({ progress }) => {
+      setProcessingProgress(Math.round(progress * 100));
+    });
+
+    try {
+      const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+      });
+      setIsFFmpegLoaded(true);
+      toast.success("Video editor ready!");
+    } catch (error) {
+      console.error("FFmpeg load error:", error);
+      toast.error("Failed to load video editor. Please refresh the page.");
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -40,127 +70,159 @@ export default function VideoEditor() {
         toast.error("Please select a valid video file");
         return;
       }
-      if (selectedFile.size > 500 * 1024 * 1024) { // 500MB limit
+      if (selectedFile.size > 500 * 1024 * 1024) {
         toast.error("File size must be less than 500MB");
         return;
       }
       setFile(selectedFile);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!file || !uploaderName || !uploaderEmail || !permissionConfirmed) {
-      toast.error("Please fill all required fields and confirm permission");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      // Upload to storage
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("videos")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Create database record
-      const { data, error: dbError } = await supabase
-        .from("video_uploads")
-        .insert({
-          original_filename: file.name,
-          file_path: filePath,
-          file_size: file.size,
-          uploader_name: uploaderName,
-          uploader_email: uploaderEmail,
-          permission_confirmed: permissionConfirmed,
-          status: "pending",
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      setUploadedVideoId(data.id);
-      toast.success("Video uploaded successfully! You can now apply transformations.");
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload video. Please try again.");
-    } finally {
-      setIsUploading(false);
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(selectedFile);
+      setVideoPreviewUrl(previewUrl);
+      
+      // Reset processed video
+      if (processedVideoUrl) {
+        URL.revokeObjectURL(processedVideoUrl);
+        setProcessedVideoUrl(null);
+      }
+      
+      toast.success("Video loaded! Adjust settings and click Process.");
     }
   };
 
   const handleProcessVideo = async () => {
-    if (!uploadedVideoId) {
-      toast.error("Please upload a video first");
+    if (!file || !isFFmpegLoaded) {
+      toast.error("Please select a video and wait for editor to load");
       return;
     }
 
-    const transformations = {
-      trim: { start: trimStart, end: trimEnd },
-      brightness,
-      contrast,
-      speed,
-      filter,
-      watermark: watermarkText,
-      exportPreset,
-    };
-
     setIsProcessing(true);
-    toast.info("Processing video with FFmpeg... This may take a few minutes.");
+    setProcessingProgress(0);
+    toast.info("Processing video... This may take a few minutes.");
 
     try {
-      const { data, error } = await supabase.functions.invoke("process-video", {
-        body: {
-          videoId: uploadedVideoId,
-          transformations,
-        },
-      });
+      const ffmpeg = ffmpegRef.current;
+      
+      // Write input file
+      await ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
-      if (error) throw error;
+      // Build FFmpeg command
+      const filters: string[] = [];
+      let args = ["-i", "input.mp4"];
 
-      setProcessedVideoPath(data.outputPath);
-      toast.success("Video processed successfully! You can now download it.");
+      // Trim
+      if (trimStart > 0 || trimEnd < 100) {
+        const videoDuration = videoRef.current?.duration || 100;
+        const start = (trimStart / 100) * videoDuration;
+        const end = (trimEnd / 100) * videoDuration;
+        args.push("-ss", start.toString(), "-to", end.toString());
+      }
+
+      // Brightness and contrast
+      if (brightness !== 0 || contrast !== 0) {
+        const brightnessVal = brightness / 100;
+        const contrastVal = 1 + contrast / 100;
+        filters.push(`eq=brightness=${brightnessVal}:contrast=${contrastVal}`);
+      }
+
+      // Speed
+      if (speed !== 1) {
+        const tempo = 1 / speed;
+        filters.push(`setpts=${tempo}*PTS`);
+      }
+
+      // Color filters
+      if (filter !== "none") {
+        switch (filter) {
+          case "grayscale":
+            filters.push("hue=s=0");
+            break;
+          case "sepia":
+            filters.push("colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131");
+            break;
+          case "vintage":
+            filters.push("curves=vintage");
+            break;
+          case "cinematic":
+            filters.push("curves=preset=darker");
+            break;
+        }
+      }
+
+      // Watermark
+      if (watermarkText) {
+        const escapedText = watermarkText.replace(/'/g, "\\'").replace(/:/g, "\\:");
+        filters.push(`drawtext=text='${escapedText}':fontsize=24:fontcolor=white@0.8:x=20:y=H-th-20:box=1:boxcolor=black@0.5:boxborderw=5`);
+      }
+
+      // Apply filters
+      if (filters.length > 0) {
+        args.push("-vf", filters.join(","));
+      }
+
+      // Export preset
+      switch (exportPreset) {
+        case "youtube":
+          args.push("-c:v", "libx264", "-preset", "medium", "-crf", "23", "-c:a", "aac", "-b:a", "128k");
+          break;
+        case "instagram":
+          args.push("-c:v", "libx264", "-crf", "25", "-s", "1080x1080", "-c:a", "aac", "-b:a", "96k");
+          break;
+        case "tiktok":
+          args.push("-c:v", "libx264", "-crf", "25", "-s", "1080x1920", "-c:a", "aac", "-b:a", "128k");
+          break;
+        case "twitter":
+          args.push("-c:v", "libx264", "-crf", "25", "-s", "1280x720", "-c:a", "aac", "-b:a", "96k");
+          break;
+        case "high":
+          args.push("-c:v", "libx264", "-preset", "slow", "-crf", "18", "-c:a", "aac", "-b:a", "192k");
+          break;
+      }
+
+      args.push("output.mp4");
+
+      console.log("FFmpeg command:", args.join(" "));
+
+      // Execute
+      await ffmpeg.exec(args);
+
+      // Read output
+      const data = await ffmpeg.readFile("output.mp4");
+      const uint8Data = typeof data === "string" 
+        ? new TextEncoder().encode(data) 
+        : new Uint8Array(data);
+      const blob = new Blob([uint8Data], { type: "video/mp4" });
+      const url = URL.createObjectURL(blob);
+      
+      // Clean up old URL
+      if (processedVideoUrl) {
+        URL.revokeObjectURL(processedVideoUrl);
+      }
+      
+      setProcessedVideoUrl(url);
+      toast.success("Video processed successfully! Click download to save.");
     } catch (error) {
       console.error("Processing error:", error);
       toast.error("Failed to process video. Please try again.");
     } finally {
       setIsProcessing(false);
+      setProcessingProgress(0);
     }
   };
 
-  const handleDownload = async () => {
-    if (!processedVideoPath) {
+  const handleDownload = () => {
+    if (!processedVideoUrl) {
       toast.error("No processed video available");
       return;
     }
 
-    try {
-      const { data, error } = await supabase.storage
-        .from("videos")
-        .download(processedVideoPath);
-
-      if (error) throw error;
-
-      // Create download link
-      const url = URL.createObjectURL(data);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `processed-video-${Date.now()}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast.success("Video downloaded successfully!");
-    } catch (error) {
-      console.error("Download error:", error);
-      toast.error("Failed to download video. Please try again.");
-    }
+    const a = document.createElement("a");
+    a.href = processedVideoUrl;
+    a.download = `chibugo-edited-${Date.now()}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success("Video downloaded successfully!");
   };
 
   return (
@@ -175,107 +237,84 @@ export default function VideoEditor() {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
             {/* Upload Section */}
-            <Card>
+            <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  Upload Video
+                  Select Video
                 </CardTitle>
-                <CardDescription>Upload your video and confirm permissions</CardDescription>
+                <CardDescription>Choose a video file to edit</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Your Name *</Label>
-                  <Input
-                    id="name"
-                    value={uploaderName}
-                    onChange={(e) => setUploaderName(e.target.value)}
-                    placeholder="Enter your name"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Your Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={uploaderEmail}
-                    onChange={(e) => setUploaderEmail(e.target.value)}
-                    placeholder="Enter your email"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="video">Select Video File *</Label>
+                  <Label htmlFor="video">Video File</Label>
                   <Input
                     id="video"
                     type="file"
                     accept="video/*"
                     onChange={handleFileChange}
                     className="cursor-pointer"
+                    disabled={!isFFmpegLoaded}
                   />
                   {file && (
                     <p className="text-sm text-muted-foreground mt-2">
-                      Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                      {file.name}<br />
+                      {(file.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  )}
+                  {!isFFmpegLoaded && (
+                    <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Loading editor...
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-start space-x-2 p-4 border rounded-lg bg-muted/50">
-                  <Checkbox
-                    id="permission"
-                    checked={permissionConfirmed}
-                    onCheckedChange={(checked) => setPermissionConfirmed(checked as boolean)}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <label
-                      htmlFor="permission"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I confirm I own or have rights to this video *
-                    </label>
-                    <p className="text-xs text-muted-foreground">
-                      By checking this box, you confirm that you have the legal right to upload,
-                      modify, and distribute this video content.
-                    </p>
+                {videoPreviewUrl && (
+                  <div className="space-y-2">
+                    <Label>Preview</Label>
+                    <video
+                      ref={videoRef}
+                      src={videoPreviewUrl}
+                      controls
+                      className="w-full rounded-lg border"
+                      style={{ maxHeight: "200px" }}
+                    />
                   </div>
-                </div>
+                )}
 
-                <Button
-                  onClick={handleUpload}
-                  disabled={isUploading || !file || !uploaderName || !uploaderEmail || !permissionConfirmed}
-                  className="w-full"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : uploadedVideoId ? (
-                    <>
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Video Uploaded
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload Video
-                    </>
-                  )}
-                </Button>
+                {processedVideoUrl && (
+                  <div className="space-y-2">
+                    <Label>Processed Video</Label>
+                    <video
+                      src={processedVideoUrl}
+                      controls
+                      className="w-full rounded-lg border"
+                      style={{ maxHeight: "200px" }}
+                    />
+                    <Button
+                      onClick={handleDownload}
+                      variant="default"
+                      className="w-full"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Edited Video
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Transformations Section */}
-            <Card>
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Video className="h-5 w-5" />
                   Video Transformations
                 </CardTitle>
-                <CardDescription>Apply professional effects to your video</CardDescription>
+                <CardDescription>Apply professional effects and export</CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="basic" className="space-y-4">
@@ -397,32 +436,22 @@ export default function VideoEditor() {
 
                     <Button
                       onClick={handleProcessVideo}
-                      disabled={!uploadedVideoId || isProcessing}
+                      disabled={!file || !isFFmpegLoaded || isProcessing}
                       className="w-full"
+                      size="lg"
                     >
                       {isProcessing ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing Video...
+                          Processing {processingProgress}%
                         </>
                       ) : (
                         <>
-                          <Video className="mr-2 h-4 w-4" />
+                          <Play className="mr-2 h-4 w-4" />
                           Process Video
                         </>
                       )}
                     </Button>
-
-                    {processedVideoPath && (
-                      <Button
-                        onClick={handleDownload}
-                        variant="outline"
-                        className="w-full mt-2"
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Processed Video
-                      </Button>
-                    )}
                   </TabsContent>
                 </Tabs>
               </CardContent>
