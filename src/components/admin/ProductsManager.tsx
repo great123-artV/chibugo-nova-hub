@@ -136,7 +136,10 @@ const ProductsManager = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
+              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Add phones, laptops, and accessories to your inventory
+              </p>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

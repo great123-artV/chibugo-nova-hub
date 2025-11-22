@@ -136,7 +136,10 @@ const PropertiesManager = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editingProperty ? "Edit Property" : "Add Property"}</DialogTitle>
+              <DialogTitle>{editingProperty ? 'Edit Property' : 'Add Property'}</DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Add landed properties, houses, or contractor services to your listings
+              </p>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -156,8 +159,9 @@ const PropertiesManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sale">For Sale</SelectItem>
-                      <SelectItem value="rent">For Rent</SelectItem>
+                      <SelectItem value="for-sale">For Sale</SelectItem>
+                      <SelectItem value="for-rent">For Rent</SelectItem>
+                      <SelectItem value="contractor">Contractor Service</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -168,9 +172,9 @@ const PropertiesManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="land">Land</SelectItem>
+                      <SelectItem value="land">Landed Property</SelectItem>
                       <SelectItem value="house">House</SelectItem>
-                      <SelectItem value="apartment">Apartment</SelectItem>
+                      <SelectItem value="contractor">Contractor Service</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

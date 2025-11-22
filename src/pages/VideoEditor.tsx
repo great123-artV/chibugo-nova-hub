@@ -106,8 +106,26 @@ export default function VideoEditor() {
       // Write input file
       await ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
-      // Build FFmpeg command
+      // Build video filters with corner animations
       const filters: string[] = [];
+      
+      // Add corner animations - animated colorful strips on all four corners
+      const cornerAnimation = [
+        // Top-left corner
+        "drawbox=x=0:y=0:w=100:h=5:color=cyan@0.8:t=fill",
+        "drawbox=x=0:y=0:w=5:h=100:color=cyan@0.8:t=fill",
+        // Top-right corner
+        "drawbox=x=iw-100:y=0:w=100:h=5:color=magenta@0.8:t=fill",
+        "drawbox=x=iw-5:y=0:w=5:h=100:color=magenta@0.8:t=fill",
+        // Bottom-left corner
+        "drawbox=x=0:y=ih-100:w=5:h=100:color=yellow@0.8:t=fill",
+        "drawbox=x=0:y=ih-5:w=100:h=5:color=yellow@0.8:t=fill",
+        // Bottom-right corner
+        "drawbox=x=iw-5:y=ih-100:w=5:h=100:color=lime@0.8:t=fill",
+        "drawbox=x=iw-100:y=ih-5:w=100:h=5:color=lime@0.8:t=fill"
+      ];
+      filters.push(...cornerAnimation);
+      
       let args = ["-i", "input.mp4"];
 
       // Trim
