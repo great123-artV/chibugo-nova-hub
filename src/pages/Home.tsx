@@ -2,21 +2,14 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Laptop, Smartphone, Home, CheckCircle, TrendingUp, Shield } from "lucide-react";
-import heroTech from "@/assets/hero-tech.jpg";
-import heroRealEstate from "@/assets/hero-realestate.jpg";
 
 const HomePage = () => {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center">
+      <section className="relative min-h-[90vh] flex items-center bg-background/95">
         <div 
-          className="absolute inset-0 z-0" 
-          style={{
-            backgroundImage: `url(${heroTech})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+          className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] "
         >
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
         </div>
@@ -91,50 +84,34 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Tech Products */}
-            <Card className="overflow-hidden group cursor-pointer shadow-soft hover:shadow-medium transition-all">
+            <Card className="overflow-hidden group cursor-pointer shadow-soft hover:shadow-medium transition-all bg-muted/30">
               <Link to="/products">
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={heroTech} 
-                    alt="Tech Products" 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Laptop className="w-6 h-6 text-primary" />
-                      <Smartphone className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2">Tech Products</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Phones, laptops & accessories - all brands
-                    </p>
-                    <Button>Browse Products</Button>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Laptop className="w-6 h-6 text-primary" />
+                    <Smartphone className="w-6 h-6 text-primary" />
                   </div>
+                  <h3 className="text-2xl font-bold mb-2">Tech Products</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Phones, laptops & accessories - all brands
+                  </p>
+                  <Button>Browse Products</Button>
                 </div>
               </Link>
             </Card>
 
             {/* Real Estate */}
-            <Card className="overflow-hidden group cursor-pointer shadow-soft hover:shadow-medium transition-all">
+            <Card className="overflow-hidden group cursor-pointer shadow-soft hover:shadow-medium transition-all bg-muted/30">
               <Link to="/properties">
-                <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={heroRealEstate} 
-                    alt="Real Estate" 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Home className="w-6 h-6 text-accent" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2">Real Estate</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Landed properties, houses & contractor services
-                    </p>
-                    <Button variant="outline">View Properties</Button>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Home className="w-6 h-6 text-accent" />
                   </div>
+                  <h3 className="text-2xl font-bold mb-2">Real Estate</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Landed properties, houses & contractor services
+                  </p>
+                  <Button variant="outline">View Properties</Button>
                 </div>
               </Link>
             </Card>
