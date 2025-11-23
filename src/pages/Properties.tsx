@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { MapPin, Bed, Bath, Car, ArrowRight, Search, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import heroRealEstate from "@/assets/hero-realestate.jpg";
 
 interface Property {
   id: string;
@@ -98,11 +97,6 @@ const PropertiesPage = () => {
         {/* Header with Image */}
         <div 
           className="relative h-[400px] rounded-2xl mb-12 overflow-hidden shadow-2xl"
-          style={{
-            backgroundImage: `url(${heroRealEstate})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent flex items-end">
             <div className="p-8 w-full">

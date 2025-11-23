@@ -7,10 +7,10 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div>
+          <div className="md:col-span-1">
             <h3 className="text-xl font-bold mb-4 text-primary">Chibugo</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Your trusted partner for quality laptops, phones, and real estate solutions in Onitsha.
+              Premium tech and real estate solutions.
             </p>
           </div>
 
