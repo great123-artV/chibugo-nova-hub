@@ -168,16 +168,7 @@ const ContactPage = () => {
           {/* Map */}
           <Card className="shadow-medium overflow-hidden">
             <CardContent className="p-0 h-full">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.4127831586876!2d6.7825!3d6.4544!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMjcnMTUuOCJOIDansDQ2JzU3LjAiRQ!5e0!3m2!1sen!2sng!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0, minHeight: '400px' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Chibugo Computers Location"
-              />
+              {/* The map will be added back later */}
             </CardContent>
           </Card>
         </div>
