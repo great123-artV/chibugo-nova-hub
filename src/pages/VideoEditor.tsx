@@ -1,0 +1,334 @@
+import { useState, useRef, useEffect } from "react";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, Video, Download, Loader2, Play, Settings, Droplet, Film, Scaling } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
+
+export default function VideoEditor() {
+  const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [jobStatus, setJobStatus] = useState<string | null>(null);
+  const [processedFiles, setProcessedFiles] = useState<any[]>([]);
+
+  // Watermark options
+  const [watermarkType, setWatermarkType] = useState("text");
+  const [watermarkText, setWatermarkText] = useState("Chibugo Computers");
+  const [watermarkLogo, setWatermarkLogo] = useState<File | null>(null);
+  const [watermarkPosition, setWatermarkPosition] = useState("bottom-right");
+
+  // Format options
+  const [outputFormats, setOutputFormats] = useState({
+    mp4: true,
+    mov: false,
+    mkv: false,
+    webm: false,
+    avi: false,
+  });
+
+  // Resolution options
+  const [outputResolutions, setOutputResolutions] = useState({
+    "1080p": true,
+    "720p": false,
+    "4k": false,
+  });
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // We can add any initial logic here if needed, e.g., checking user auth.
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (!selectedFile.type.startsWith("video/")) {
+        toast.error("Please select a valid video file");
+        return;
+      }
+      if (selectedFile.size > 500 * 1024 * 1024) {
+        toast.error("File size must be less than 500MB");
+        return;
+      }
+      setFile(selectedFile);
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(selectedFile);
+      setVideoPreviewUrl(previewUrl);
+
+      // Reset processed video
+      if (processedVideoUrl) {
+        URL.revokeObjectURL(processedVideoUrl);
+        setProcessedVideoUrl(null);
+      }
+
+      toast.success("Video loaded! Adjust settings and click Process.");
+    }
+  };
+
+  const handleUploadAndProcess = async () => {
+    if (!file) {
+      toast.error("Please select a video file first");
+      return;
+    }
+
+    setIsProcessing(true);
+    setUploadProgress(0);
+    setJobStatus("Uploading...");
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("You must be logged in to process videos.");
+        setIsProcessing(false);
+        return;
+      }
+
+      const timestamp = Date.now();
+      const videoPath = `${session.user.id}/${timestamp}-${file.name}`;
+
+      // Upload video
+      const { error: videoError } = await supabase.storage
+        .from("videos")
+        .upload(videoPath, file, {
+          onProgress: ({ loaded, total }) => {
+            setUploadProgress(Math.round((loaded / total) * 100));
+          },
+        });
+
+      if (videoError) throw videoError;
+
+      let watermarkPath: string | null = null;
+      if (watermarkType === "logo" && watermarkLogo) {
+        setJobStatus("Uploading watermark...");
+        watermarkPath = `${session.user.id}/${timestamp}-${watermarkLogo.name}`;
+        const { error: logoError } = await supabase.storage
+          .from("watermarks")
+          .upload(watermarkPath, watermarkLogo);
+        if (logoError) throw logoError;
+      }
+
+      setJobStatus("Invoking processing function...");
+
+      const { data, error: invokeError } = await supabase.functions.invoke("video-processor", {
+        body: {
+          inputVideoPath: videoPath,
+          watermark: {
+            type: watermarkType,
+            text: watermarkText,
+            logoPath: watermarkPath,
+            position: watermarkPosition,
+          },
+          formats: Object.keys(outputFormats).filter(k => outputFormats[k as keyof typeof outputFormats]),
+          resolutions: Object.keys(outputResolutions).filter(k => outputResolutions[k as keyof typeof outputResolutions]),
+        },
+      });
+
+      if (invokeError) throw invokeError;
+
+      setJobStatus("Processing started. Please wait.");
+      pollJobStatus(data.jobId);
+
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error(error.message || "An error occurred during processing.");
+      setIsProcessing(false);
+    }
+  };
+
+  const pollJobStatus = async (jobId: string) => {
+    const interval = setInterval(async () => {
+      const { data, error } = await supabase
+        .from("video_processing_jobs")
+        .select("*")
+        .eq("id", jobId)
+        .single();
+
+      if (error) {
+        console.error("Polling error:", error);
+        clearInterval(interval);
+        return;
+      }
+
+      if (data.status === "completed" || data.status === "failed") {
+        clearInterval(interval);
+        setJobStatus(data.status);
+        if (data.status === "completed") {
+          toast.success("Processing complete!");
+          setProcessedFiles(data.output_files || []);
+        } else {
+          toast.error("Processing failed. Please check the logs.");
+        }
+        setIsProcessing(false);
+      } else {
+        setJobStatus(data.status);
+      }
+    }, 5000);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      <main className="flex-1 pt-20">
+        <div className="container mx-auto px-4 py-12 max-w-6xl">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">Video Processing Engine</h1>
+            <p className="text-muted-foreground">
+              Upload a video to automatically apply transformations and generate multiple versions.
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Left Column: Upload & Previews */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Upload className="h-5 w-5" />Upload Video</CardTitle>
+                  <CardDescription>Select a video file to begin processing.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Input id="video-upload" type="file" accept="video/*" onChange={handleFileChange} disabled={isProcessing} />
+                  {file && <p className="text-sm text-muted-foreground mt-2">{file.name} ({(file.size / 1e6).toFixed(2)} MB)</p>}
+                </CardContent>
+              </Card>
+
+              {videoPreviewUrl && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Original Video Preview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <video ref={videoRef} src={videoPreviewUrl} controls className="w-full rounded-lg border" />
+                  </CardContent>
+                </Card>
+              )}
+
+              {processedFiles.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Processed Video Preview</CardTitle>
+                    <CardDescription>Preview one of the processed videos below.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <video src={processedFiles[0].url} controls className="w-full rounded-lg border" />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Right Column: Settings & Actions */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Processing Settings</CardTitle>
+                  <CardDescription>Configure the transformations for your video.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="watermark">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="watermark">Watermark</TabsTrigger>
+                      <TabsTrigger value="formats">Formats</TabsTrigger>
+                      <TabsTrigger value="resolutions">Resolutions</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="watermark" className="pt-4 space-y-4">
+                      <Select value={watermarkType} onValueChange={setWatermarkType}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Text Watermark</SelectItem>
+                          <SelectItem value="logo">Logo/Image Watermark</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {watermarkType === 'text' && (
+                        <Input value={watermarkText} onChange={(e) => setWatermarkText(e.target.value)} placeholder="Enter watermark text" />
+                      )}
+
+                      {watermarkType === 'logo' && (
+                        <Input type="file" accept="image/*" onChange={(e) => setWatermarkLogo(e.target.files?.[0] || null)} />
+                      )}
+
+                      <Select value={watermarkPosition} onValueChange={setWatermarkPosition}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="top-left">Top Left</SelectItem>
+                          <SelectItem value="top-right">Top Right</SelectItem>
+                          <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                          <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                          <SelectItem value="center">Center</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TabsContent>
+
+                    <TabsContent value="formats" className="pt-4 space-y-2">
+                      <div className="flex items-center space-x-2"><Checkbox id="mp4" checked={outputFormats.mp4} onCheckedChange={(c) => setOutputFormats(f => ({...f, mp4: !!c}))} /><Label htmlFor="mp4">MP4</Label></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="mov" checked={outputFormats.mov} onCheckedChange={(c) => setOutputFormats(f => ({...f, mov: !!c}))} /><Label htmlFor="mov">MOV</Label></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="mkv" checked={outputFormats.mkv} onCheckedChange={(c) => setOutputFormats(f => ({...f, mkv: !!c}))} /><Label htmlFor="mkv">MKV</Label></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="webm" checked={outputFormats.webm} onCheckedChange={(c) => setOutputFormats(f => ({...f, webm: !!c}))} /><Label htmlFor="webm">WEBM</Label></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="avi" checked={outputFormats.avi} onCheckedChange={(c) => setOutputFormats(f => ({...f, avi: !!c}))} /><Label htmlFor="avi">AVI</Label></div>
+                    </TabsContent>
+
+                    <TabsContent value="resolutions" className="pt-4 space-y-2">
+                      <div className="flex items-center space-x-2"><Checkbox id="1080p" checked={outputResolutions['1080p']} onCheckedChange={(c) => setOutputResolutions(r => ({...r, '1080p': !!c}))} /><Label htmlFor="1080p">1080p</Label></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="720p" checked={outputResolutions['720p']} onCheckedChange={(c) => setOutputResolutions(r => ({...r, '720p': !!c}))} /><Label htmlFor="720p">720p</Label></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="4k" checked={outputResolutions['4k']} onCheckedChange={(c) => setOutputResolutions(r => ({...r, '4k': !!c}))} /><Label htmlFor="4k">4K</Label></div>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+
+              <Button onClick={handleUploadAndProcess} disabled={!file || isProcessing} className="w-full" size="lg">
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {jobStatus} ({uploadProgress > 0 && uploadProgress < 100 ? `Uploading ${uploadProgress}%` : ''})
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-4 w-4" />
+                    Start Processing
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {processedFiles.length > 0 && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Download className="h-5 w-5" />Download Processed Videos</CardTitle>
+                <CardDescription>Your videos are ready for download. They will be available for 24-48 hours.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {processedFiles.map(pf => (
+                    <li key={pf.path} className="flex justify-between items-center p-2 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{pf.path.split('/').pop()}</p>
+                        <p className="text-sm text-muted-foreground">{pf.format.toUpperCase()} - {pf.resolution} - {(pf.size / 1e6).toFixed(2)} MB</p>
+                      </div>
+                      <Button asChild variant="outline">
+                        <a href={pf.url} download>Download</a>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

@@ -1,0 +1,8 @@
+-- cron.yaml
+jobs:
+  - name: delete-old-videos
+    schedule: "0 0 * * *" # Runs every day at midnight
+    command: |
+      delete from storage.objects where bucket_id = 'processed-videos' and created_at < now() - interval '24 hours';
+      delete from storage.objects where bucket_id = 'videos' and created_at < now() - interval '24 hours';
+      delete from public.video_processing_jobs where created_at < now() - interval '24 hours';

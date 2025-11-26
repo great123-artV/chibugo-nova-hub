@@ -26,6 +26,9 @@ const Navigation = () => {
             <Link to="/properties" className="text-foreground hover:text-primary transition-colors">
               Properties
             </Link>
+            <Link to="/video-editor" className="text-foreground hover:text-primary transition-colors">
+              Video Editor
+            </Link>
             <Link to="/about" className="text-foreground hover:text-primary transition-colors">
               About
             </Link>
@@ -35,12 +38,14 @@ const Navigation = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <a href="tel:08161844109" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              <Phone size={16} />
-              <span>08161844109</span>
-            </a>
+            <div className="flex flex-col text-sm text-right">
+              <span className="text-muted-foreground">Gadgets:</span>
+              <a href="tel:08161844109" className="text-primary hover:underline">
+                08161844109
+              </a>
+            </div>
             <Button asChild>
-              <Link to="/contact">Contact Us</Link>
+              <Link to="/contact">Get Started</Link>
             </Button>
           </div>
 
