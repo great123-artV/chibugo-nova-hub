@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { MapPin, Search, Home, Building2, TreePine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import estateBackground from "@/assets/estate-background.jpg";
 
 interface Property {
   id: string;
@@ -92,18 +93,14 @@ const PropertiesPage = () => {
   }
 
   return (
-    <div className="min-h-screen py-8 bg-gradient-to-br from-estate-cream/20 via-background to-estate-warm/10 relative overflow-hidden">
-      {/* Architectural Background Elements */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute top-20 right-10">
-          <Building2 className="w-48 h-48 text-estate-gold" />
-        </div>
-        <div className="absolute bottom-40 left-20">
-          <Home className="w-40 h-40 text-estate-earth" />
-        </div>
-        <div className="absolute top-1/3 right-1/4">
-          <TreePine className="w-32 h-32 text-estate-green" />
-        </div>
+    <div className="min-h-screen py-8 relative overflow-hidden">
+      {/* Real Estate Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${estateBackground})` }}
+      >
+        <div className="absolute inset-0 bg-background/90 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-estate-gold/10 via-estate-cream/5 to-estate-earth/10"></div>
       </div>
 
       {/* Subtle Texture Overlay */}
