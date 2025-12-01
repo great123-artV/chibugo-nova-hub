@@ -42,6 +42,28 @@ All colors MUST be HSL.
     --gradient-hero: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 100%) 100%);
     --shadow-soft: 0 1px 3px hsl(0 0% 0% / 0.05);
     --shadow-medium: 0 4px 12px hsl(0 0% 0% / 0.08);
+    
+    /* Tech Phase Colors */
+    --tech-glow: 200 100% 50%;
+    --tech-accent: 195 100% 45%;
+    --tech-dark: 220 30% 8%;
+    --tech-border: 200 80% 30%;
+    
+    /* Real Estate Phase Colors */
+    --estate-warm: 35 65% 65%;
+    --estate-gold: 42 78% 60%;
+    --estate-cream: 40 30% 90%;
+    --estate-earth: 25 45% 55%;
+    --estate-green: 145 25% 45%;
+    
+    /* Tech Shadows & Effects */
+    --shadow-tech: 0 0 20px hsl(200 100% 50% / 0.3), 0 4px 12px hsl(0 0% 0% / 0.2);
+    --shadow-tech-sm: 0 0 10px hsl(200 100% 50% / 0.2);
+    --glow-tech: 0 0 30px hsl(200 100% 50% / 0.4);
+    
+    /* Estate Shadows */
+    --shadow-estate: 0 8px 24px hsl(0 0% 0% / 0.12);
+    --shadow-estate-hover: 0 12px 32px hsl(0 0% 0% / 0.16);
 
     --sidebar-background: 0 0% 98%;
 
@@ -93,6 +115,18 @@ All colors MUST be HSL.
     --gradient-hero: linear-gradient(180deg, hsl(0 0% 12%) 0%, hsl(0 0% 10%) 100%);
     --shadow-soft: 0 1px 3px hsl(0 0% 0% / 0.3);
     --shadow-medium: 0 4px 12px hsl(0 0% 0% / 0.4);
+    
+    /* Tech Phase Colors (Dark Mode) */
+    --tech-glow: 200 100% 60%;
+    --tech-accent: 195 100% 55%;
+    --tech-dark: 220 30% 12%;
+    --tech-border: 200 80% 40%;
+    
+    /* Estate colors stay warm in dark mode */
+    --shadow-tech: 0 0 20px hsl(200 100% 60% / 0.4), 0 4px 12px hsl(0 0% 0% / 0.4);
+    --shadow-tech-sm: 0 0 10px hsl(200 100% 60% / 0.3);
+    --shadow-estate: 0 8px 24px hsl(0 0% 0% / 0.3);
+    --shadow-estate-hover: 0 12px 32px hsl(0 0% 0% / 0.4);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

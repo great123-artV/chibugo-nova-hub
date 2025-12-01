@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Laptop, Smartphone, Home, CheckCircle, TrendingUp, Shield } from "lucide-react";
 
 const HomePage = () => {
@@ -83,35 +84,59 @@ const HomePage = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Tech Products */}
-            <Card className="overflow-hidden group cursor-pointer shadow-soft hover:shadow-medium transition-all bg-muted/30">
+            {/* Tech Products - Cool Blue Theme */}
+            <Card className="overflow-hidden group cursor-pointer shadow-tech hover:shadow-tech transition-all border-tech-border/30 bg-gradient-to-br from-tech-dark/20 to-background relative">
               <Link to="/products">
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Laptop className="w-6 h-6 text-primary" />
-                    <Smartphone className="w-6 h-6 text-primary" />
+                {/* Tech Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-tech-glow/5 via-transparent to-tech-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Circuit Pattern Background */}
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
+                  <div className="w-full h-full bg-[radial-gradient(circle_at_center,hsl(var(--tech-glow))_0%,transparent_70%)]"></div>
+                </div>
+
+                <div className="p-8 relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Laptop className="w-8 h-8 text-tech-glow group-hover:scale-110 transition-transform" />
+                    <Smartphone className="w-8 h-8 text-tech-accent group-hover:scale-110 transition-transform" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Tech Products</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Phones, laptops & accessories - all brands
+                  <Badge className="mb-3 bg-tech-glow/20 text-tech-glow border-tech-glow/50">TECH</Badge>
+                  <h3 className="text-3xl font-bold mb-3 group-hover:text-tech-glow transition-colors">Tech Products</h3>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Cutting-edge phones, laptops & accessories from all major brands
                   </p>
-                  <Button>Browse Products</Button>
+                  <Button className="bg-gradient-to-r from-tech-dark to-tech-border hover:from-tech-glow hover:to-tech-accent group-hover:shadow-tech-sm transition-all">
+                    Browse Products
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
+                  </Button>
                 </div>
               </Link>
             </Card>
 
-            {/* Real Estate */}
-            <Card className="overflow-hidden group cursor-pointer shadow-soft hover:shadow-medium transition-all bg-muted/30">
+            {/* Real Estate - Warm Gold Theme */}
+            <Card className="overflow-hidden group cursor-pointer shadow-estate hover:shadow-estate-hover transition-all border-estate-gold/30 bg-gradient-to-br from-estate-cream/20 to-background relative">
               <Link to="/properties">
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Home className="w-6 h-6 text-accent" />
+                {/* Luxury Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-estate-gold/5 via-transparent to-estate-warm/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Architectural Element */}
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
+                  <Home className="w-full h-full text-estate-gold" />
+                </div>
+
+                <div className="p-8 relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Home className="w-8 h-8 text-estate-gold group-hover:scale-110 transition-transform" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Real Estate</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Landed properties, houses & contractor services
+                  <Badge className="mb-3 bg-estate-gold/20 text-estate-earth border-estate-gold/50">REAL ESTATE</Badge>
+                  <h3 className="text-3xl font-bold mb-3 group-hover:text-estate-gold transition-colors">Properties</h3>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    Premium landed properties, houses & professional contractor services
                   </p>
-                  <Button variant="outline">View Properties</Button>
+                  <Button className="bg-gradient-to-r from-estate-earth to-estate-gold hover:from-estate-gold hover:to-estate-earth text-white border-0 group-hover:shadow-estate transition-all">
+                    View Properties
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
+                  </Button>
                 </div>
               </Link>
             </Card>
