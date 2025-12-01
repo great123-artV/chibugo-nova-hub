@@ -57,6 +57,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        tech: {
+          glow: "hsl(var(--tech-glow))",
+          accent: "hsl(var(--tech-accent))",
+          dark: "hsl(var(--tech-dark))",
+          border: "hsl(var(--tech-border))",
+        },
+        estate: {
+          warm: "hsl(var(--estate-warm))",
+          gold: "hsl(var(--estate-gold))",
+          cream: "hsl(var(--estate-cream))",
+          earth: "hsl(var(--estate-earth))",
+          green: "hsl(var(--estate-green))",
+        },
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
@@ -65,6 +78,10 @@ export default {
       boxShadow: {
         'soft': 'var(--shadow-soft)',
         'medium': 'var(--shadow-medium)',
+        'tech': 'var(--shadow-tech)',
+        'tech-sm': 'var(--shadow-tech-sm)',
+        'estate': 'var(--shadow-estate)',
+        'estate-hover': 'var(--shadow-estate-hover)',
       },
       borderRadius: {
         lg: "var(--radius)",
