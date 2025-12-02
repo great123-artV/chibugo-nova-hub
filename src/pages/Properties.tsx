@@ -6,9 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Home, Building2, TreePine } from "lucide-react";
+import { MapPin, Search, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import estateBackground from "@/assets/estate-background.jpg";
 
 interface Property {
   id: string;
@@ -93,18 +92,10 @@ const PropertiesPage = () => {
   }
 
   return (
-    <div className="min-h-screen py-8 relative overflow-hidden">
-      {/* Real Estate Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${estateBackground})` }}
-      >
-        <div className="absolute inset-0 bg-background/90 backdrop-blur-sm"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-estate-gold/10 via-estate-cream/5 to-estate-earth/10"></div>
-      </div>
-
-      {/* Subtle Texture Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--estate-gold))_0%,transparent_50%)] opacity-5"></div>
+    <div className="min-h-screen py-8 relative overflow-hidden bg-gradient-to-br from-estate-cream/30 via-background to-estate-warm/20">
+      {/* Warm Radial Gradient */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--estate-gold)/0.1)_0%,transparent_60%)]"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-estate-cream/10 via-transparent to-estate-earth/5"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}

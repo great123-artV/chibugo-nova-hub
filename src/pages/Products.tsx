@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Laptop, Smartphone, Search, Cpu, CircuitBoard } from "lucide-react";
+import { Laptop, Smartphone, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import techBackground from "@/assets/tech-background.jpg";
 
 interface Product {
   id: string;
@@ -86,18 +85,10 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen py-8 relative overflow-hidden">
-      {/* Tech Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${techBackground})` }}
-      >
-        <div className="absolute inset-0 bg-background/85 backdrop-blur-sm"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-tech-glow/10 via-transparent to-tech-accent/10"></div>
-      </div>
-
-      {/* Animated Grid Lines */}
+    <div className="min-h-screen py-8 relative overflow-hidden bg-gradient-to-br from-tech-dark via-background to-tech-dark/80">
+      {/* Tech Grid Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--tech-border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--tech-border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-tech-glow/5 via-transparent to-tech-accent/5"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
