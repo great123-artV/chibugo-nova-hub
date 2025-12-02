@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Laptop, Smartphone, Home, CheckCircle, TrendingUp, Shield } from "lucide-react";
+import techHero from "@/assets/tech-hero.jpg";
 
 const HomePage = () => {
   return (
@@ -30,7 +31,7 @@ const HomePage = () => {
               <span className="bg-gradient-to-r from-estate-gold to-estate-earth bg-clip-text text-transparent">Real Estate</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 animate-fade-in max-w-2xl">
-              Discover quality phones, laptops, accessories and premium properties. Your trusted partner in Onitsha - we manage everything 100%.
+              Discover premium phones, laptops, accessories and quality properties across Nigeria. Trusted service, flexible payments, nationwide delivery.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
               <Button asChild size="lg" className="bg-gradient-to-r from-tech-glow to-tech-accent hover:opacity-90 text-white shadow-tech">
@@ -53,7 +54,7 @@ const HomePage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Chibugo Computer Tech?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We offer phones, laptops, accessories, landed properties, houses and contractor services with flexible payment options. We manage everything 100% for you.
+              Premium gadgets, landed properties, houses and contractor services with flexible payment options. We deliver nationwide across Nigeria.
             </p>
           </div>
           
@@ -81,9 +82,9 @@ const HomePage = () => {
             <Card className="shadow-soft hover:shadow-medium transition-shadow">
               <CardContent className="pt-6">
                 <Shield className="w-12 h-12 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Trusted Service</h3>
+                <h3 className="text-xl font-semibold mb-2">Nationwide Service</h3>
                 <p className="text-muted-foreground">
-                  Years of experience serving customers in Onitsha and beyond.
+                  Serving customers across all states in Nigeria with reliable delivery and support.
                 </p>
               </CardContent>
             </Card>
@@ -95,28 +96,32 @@ const HomePage = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Tech Products - Cool Blue Theme */}
-            <Card className="overflow-hidden group cursor-pointer shadow-tech hover:shadow-tech transition-all border-tech-border/30 bg-gradient-to-br from-tech-dark/20 to-background relative">
-              <Link to="/products">
-                {/* Tech Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-tech-glow/5 via-transparent to-tech-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            {/* Tech Products - With Laptop Background */}
+            <Card className="overflow-hidden group cursor-pointer shadow-tech hover:shadow-tech transition-all border-tech-border/30 relative min-h-[400px]">
+              <Link to="/products" className="block h-full">
+                {/* Laptop Background Image */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${techHero})` }}
+                ></div>
                 
-                {/* Circuit Pattern Background */}
-                <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
-                  <div className="w-full h-full bg-[radial-gradient(circle_at_center,hsl(var(--tech-glow))_0%,transparent_70%)]"></div>
-                </div>
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-tech-dark via-tech-dark/80 to-tech-dark/40 group-hover:from-tech-dark group-hover:via-tech-dark/70 group-hover:to-tech-dark/30 transition-all duration-500"></div>
+                
+                {/* Tech Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-tech-glow/10 via-transparent to-tech-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                <div className="p-8 relative z-10">
+                <div className="p-8 relative z-10 h-full flex flex-col justify-end">
                   <div className="flex items-center gap-3 mb-4">
                     <Laptop className="w-8 h-8 text-tech-glow group-hover:scale-110 transition-transform" />
                     <Smartphone className="w-8 h-8 text-tech-accent group-hover:scale-110 transition-transform" />
                   </div>
-                  <Badge className="mb-3 bg-tech-glow/20 text-tech-glow border-tech-glow/50">TECH</Badge>
-                  <h3 className="text-3xl font-bold mb-3 group-hover:text-tech-glow transition-colors">Tech Products</h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    Cutting-edge phones, laptops & accessories from all major brands
+                  <Badge className="mb-3 w-fit bg-tech-glow/30 text-tech-glow border-tech-glow/50 backdrop-blur-sm">GADGETS</Badge>
+                  <h3 className="text-3xl font-bold mb-3 text-white group-hover:text-tech-glow transition-colors">Tech Products</h3>
+                  <p className="text-white/80 mb-6 leading-relaxed">
+                    Latest phones, laptops & accessories from top brands worldwide
                   </p>
-                  <Button className="bg-gradient-to-r from-tech-dark to-tech-border hover:from-tech-glow hover:to-tech-accent group-hover:shadow-tech-sm transition-all">
+                  <Button className="w-fit bg-tech-glow/20 backdrop-blur-sm border border-tech-glow/50 text-white hover:bg-tech-glow hover:text-white group-hover:shadow-tech-sm transition-all">
                     Browse Products
                     <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                   </Button>
@@ -125,8 +130,8 @@ const HomePage = () => {
             </Card>
 
             {/* Real Estate - Warm Gold Theme */}
-            <Card className="overflow-hidden group cursor-pointer shadow-estate hover:shadow-estate-hover transition-all border-estate-gold/30 bg-gradient-to-br from-estate-cream/20 to-background relative">
-              <Link to="/properties">
+            <Card className="overflow-hidden group cursor-pointer shadow-estate hover:shadow-estate-hover transition-all border-estate-gold/30 bg-gradient-to-br from-estate-cream/20 to-background relative min-h-[400px]">
+              <Link to="/properties" className="block h-full">
                 {/* Luxury Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-estate-gold/5 via-transparent to-estate-warm/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
@@ -135,16 +140,16 @@ const HomePage = () => {
                   <Home className="w-full h-full text-estate-gold" />
                 </div>
 
-                <div className="p-8 relative z-10">
+                <div className="p-8 relative z-10 h-full flex flex-col justify-end">
                   <div className="flex items-center gap-3 mb-4">
                     <Home className="w-8 h-8 text-estate-gold group-hover:scale-110 transition-transform" />
                   </div>
-                  <Badge className="mb-3 bg-estate-gold/20 text-estate-earth border-estate-gold/50">REAL ESTATE</Badge>
+                  <Badge className="mb-3 w-fit bg-estate-gold/20 text-estate-earth border-estate-gold/50">REAL ESTATE</Badge>
                   <h3 className="text-3xl font-bold mb-3 group-hover:text-estate-gold transition-colors">Properties</h3>
                   <p className="text-muted-foreground mb-6 leading-relaxed">
                     Premium landed properties, houses & professional contractor services
                   </p>
-                  <Button className="bg-gradient-to-r from-estate-earth to-estate-gold hover:from-estate-gold hover:to-estate-earth text-white border-0 group-hover:shadow-estate transition-all">
+                  <Button className="w-fit bg-gradient-to-r from-estate-earth to-estate-gold hover:from-estate-gold hover:to-estate-earth text-white border-0 group-hover:shadow-estate transition-all">
                     View Properties
                     <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                   </Button>
@@ -162,7 +167,7 @@ const HomePage = () => {
             Ready to Get Started?
           </h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-            Visit our shop or contact us today to find the perfect product or property for your needs.
+            Contact us today to find the perfect product or property. We deliver anywhere in Nigeria.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" variant="secondary">
