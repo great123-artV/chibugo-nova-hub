@@ -115,7 +115,7 @@ const ProductsPage = () => {
         {/* Filters with Tech Style */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-tech-accent" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/60" size={20} />
             <Input
               placeholder="Search products..."
               value={searchTerm}

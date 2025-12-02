@@ -8,27 +8,38 @@ const HomePage = () => {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center bg-background/95">
-        <div 
-          className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] "
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        </div>
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        {/* Dynamic Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-tech-dark via-background to-estate-earth/20"></div>
+        
+        {/* Animated Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--tech-border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--tech-border)/0.3)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
+        
+        {/* Glowing Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-tech-glow/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-estate-gold/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-2xl">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
-              Premium Tech &{" "}
-              <span className="text-primary">Real Estate</span> Solutions
+          <div className="max-w-3xl">
+            <Badge className="mb-6 bg-tech-glow/20 text-tech-glow border-tech-glow/50 px-4 py-2">
+              CHIBUGO COMPUTER TECH / REAL ESTATE
+            </Badge>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in leading-tight">
+              Premium{" "}
+              <span className="bg-gradient-to-r from-tech-glow to-tech-accent bg-clip-text text-transparent">Tech</span> &{" "}
+              <span className="bg-gradient-to-r from-estate-gold to-estate-earth bg-clip-text text-transparent">Real Estate</span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 animate-fade-in">
-              Discover quality phones, laptops, accessories and properties at Chibugo Computer Tech / Real Estate. Your trusted partner in Onitsha - we manage everything 100%.
+            <p className="text-xl text-muted-foreground mb-8 animate-fade-in max-w-2xl">
+              Discover quality phones, laptops, accessories and premium properties. Your trusted partner in Onitsha - we manage everything 100%.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
-              <Button asChild size="lg" className="shadow-soft">
+              <Button asChild size="lg" className="bg-gradient-to-r from-tech-glow to-tech-accent hover:opacity-90 text-white shadow-tech">
                 <Link to="/products">Shop Products</Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
+              <Button asChild size="lg" className="bg-gradient-to-r from-estate-gold to-estate-earth hover:opacity-90 text-white">
+                <Link to="/properties">View Properties</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-foreground/30">
                 <Link to="/contact">Contact Us</Link>
               </Button>
             </div>
