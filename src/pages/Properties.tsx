@@ -123,7 +123,7 @@ const PropertiesPage = () => {
         {/* Filters with Estate Style */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-estate-earth" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/60" size={20} />
             <Input
               placeholder="Search properties by title or location..."
               value={searchTerm}
