@@ -2,139 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ============================================
+   FUTURISTIC DESIGN SYSTEM
+   Premium, Sleek, International Standard
+   ============================================ */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
+    /* Core Colors - Deep Charcoal Theme */
+    --background: 220 15% 6%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card: 220 15% 8%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 0 0% 10%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 200 100% 50%;
+    --primary-foreground: 220 15% 6%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 220 15% 12%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 195 100% 45%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 20%;
+    --border: 220 15% 18%;
+    --input: 220 15% 15%;
+    --ring: 200 100% 50%;
 
-    --radius: 0.25rem;
+    --radius: 0.75rem;
     
-    --gradient-primary: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 5%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 100%) 100%);
-    --shadow-soft: 0 1px 3px hsl(0 0% 0% / 0.05);
-    --shadow-medium: 0 4px 12px hsl(0 0% 0% / 0.08);
+    /* Futuristic Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(200 100% 50%) 0%, hsl(195 100% 45%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(220 15% 4%) 0%, hsl(220 15% 8%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 15% 15% / 0.8) 0%, hsl(220 15% 10% / 0.6) 100%);
     
-    /* Tech Phase Colors */
-    --tech-glow: 200 100% 50%;
-    --tech-accent: 195 100% 45%;
-    --tech-dark: 220 30% 8%;
-    --tech-border: 200 80% 30%;
+    /* Premium Shadows */
+    --shadow-soft: 0 4px 20px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 8px 40px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 60px hsl(200 100% 50% / 0.15);
     
-    /* Real Estate Phase Colors */
-    --estate-warm: 35 65% 65%;
-    --estate-gold: 42 78% 60%;
-    --estate-cream: 40 30% 90%;
-    --estate-earth: 25 45% 55%;
+    /* Tech Phase Colors - Electric Blue & Cool Silver */
+    --tech-glow: 200 100% 55%;
+    --tech-accent: 195 100% 50%;
+    --tech-dark: 220 20% 5%;
+    --tech-border: 200 60% 25%;
+    --tech-silver: 220 10% 70%;
+    
+    /* Real Estate Phase Colors - Luxury Gold & Warm Tones */
+    --estate-warm: 35 45% 55%;
+    --estate-gold: 42 85% 55%;
+    --estate-cream: 40 20% 90%;
+    --estate-earth: 25 35% 35%;
     --estate-green: 145 25% 45%;
+    --estate-luxury: 0 0% 8%;
     
-    /* Tech Shadows & Effects */
-    --shadow-tech: 0 0 20px hsl(200 100% 50% / 0.3), 0 4px 12px hsl(0 0% 0% / 0.2);
-    --shadow-tech-sm: 0 0 10px hsl(200 100% 50% / 0.2);
-    --glow-tech: 0 0 30px hsl(200 100% 50% / 0.4);
+    /* Tech Phase Shadows & Effects */
+    --shadow-tech: 0 0 40px hsl(200 100% 55% / 0.2), 0 8px 32px hsl(0 0% 0% / 0.4);
+    --shadow-tech-sm: 0 0 20px hsl(200 100% 55% / 0.15);
+    --glow-tech: 0 0 80px hsl(200 100% 55% / 0.3);
     
-    /* Estate Shadows */
-    --shadow-estate: 0 8px 24px hsl(0 0% 0% / 0.12);
-    --shadow-estate-hover: 0 12px 32px hsl(0 0% 0% / 0.16);
+    /* Estate Phase Shadows */
+    --shadow-estate: 0 12px 40px hsl(0 0% 0% / 0.3);
+    --shadow-estate-hover: 0 20px 60px hsl(0 0% 0% / 0.4);
+    --shadow-gold: 0 0 40px hsl(42 85% 55% / 0.15);
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    /* Sidebar */
+    --sidebar-background: 220 15% 8%;
+    --sidebar-foreground: 220 10% 80%;
+    --sidebar-primary: 200 100% 50%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 220 10% 90%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 200 100% 50%;
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 98%;
+    /* Dark mode is default - same values */
+    --background: 220 15% 6%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 220 15% 8%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 200 100% 50%;
+    --primary-foreground: 220 15% 6%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 15% 12%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 0 0% 90%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 195 100% 45%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 80%;
-    
-    --gradient-primary: linear-gradient(135deg, hsl(0 0% 98%) 0%, hsl(0 0% 90%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 12%) 0%, hsl(0 0% 10%) 100%);
-    --shadow-soft: 0 1px 3px hsl(0 0% 0% / 0.3);
-    --shadow-medium: 0 4px 12px hsl(0 0% 0% / 0.4);
-    
-    /* Tech Phase Colors (Dark Mode) */
-    --tech-glow: 200 100% 60%;
-    --tech-accent: 195 100% 55%;
-    --tech-dark: 220 30% 12%;
-    --tech-border: 200 80% 40%;
-    
-    /* Estate colors stay warm in dark mode */
-    --shadow-tech: 0 0 20px hsl(200 100% 60% / 0.4), 0 4px 12px hsl(0 0% 0% / 0.4);
-    --shadow-tech-sm: 0 0 10px hsl(200 100% 60% / 0.3);
-    --shadow-estate: 0 8px 24px hsl(0 0% 0% / 0.3);
-    --shadow-estate-hover: 0 12px 32px hsl(0 0% 0% / 0.4);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 15% 18%;
+    --input: 220 15% 15%;
+    --ring: 200 100% 50%;
   }
 }
 
@@ -143,7 +123,71 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Effects */
+  .glass {
+    @apply bg-card/60 backdrop-blur-xl border border-border/50;
+  }
+  
+  .glass-strong {
+    @apply bg-card/80 backdrop-blur-2xl border border-border/60;
+  }
+
+  /* Neon Glow Effects */
+  .neon-border {
+    box-shadow: 0 0 10px hsl(var(--tech-glow) / 0.3),
+                inset 0 0 10px hsl(var(--tech-glow) / 0.1);
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 20px hsl(var(--tech-glow) / 0.5),
+                 0 0 40px hsl(var(--tech-glow) / 0.3);
+  }
+
+  /* Gold Glow for Estate */
+  .gold-glow {
+    box-shadow: 0 0 30px hsl(var(--estate-gold) / 0.2);
+  }
+
+  /* Futuristic Grid Background */
+  .futuristic-grid {
+    background-image: 
+      linear-gradient(to right, hsl(var(--tech-border) / 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--tech-border) / 0.15) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Luxury Pattern for Estate */
+  .luxury-pattern {
+    background-image: 
+      radial-gradient(ellipse at 30% 20%, hsl(var(--estate-gold) / 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 80%, hsl(var(--estate-warm) / 0.05) 0%, transparent 50%);
+  }
+}
+
+@layer utilities {
+  /* Gradient Text */
+  .text-gradient-tech {
+    @apply bg-gradient-to-r from-tech-glow via-tech-accent to-tech-silver bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-estate {
+    @apply bg-gradient-to-r from-estate-gold via-estate-warm to-estate-earth bg-clip-text text-transparent;
+  }
+
+  /* Smooth Transitions */
+  .transition-smooth {
+    @apply transition-all duration-500 ease-out;
   }
 }
