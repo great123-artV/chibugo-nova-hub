@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
+import FloatingContact from "./components/FloatingContact";
 import { NovaAssistant } from "./components/NovaAssistant";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -43,6 +44,7 @@ const App = () => (
           </main>
           <Footer />
         </div>
+        <FloatingContact />
         <NovaAssistant />
       </BrowserRouter>
     </TooltipProvider>

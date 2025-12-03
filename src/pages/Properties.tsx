@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { MapPin, Search, Home, Building2, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SocialRibbon from "@/components/SocialRibbon";
 
 interface Property {
   id: string;
@@ -140,6 +141,9 @@ const PropertiesPage = () => {
       {/* Gold Edge Lines */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-estate-gold/30 to-transparent"></div>
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-estate-warm/20 to-transparent"></div>
+
+      {/* Social Ribbon */}
+      <SocialRibbon variant="estate" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
