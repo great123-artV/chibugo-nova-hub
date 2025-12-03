@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Laptop, Smartphone, Search, Cpu, Monitor } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SocialRibbon from "@/components/SocialRibbon";
 
 interface Product {
   id: string;
@@ -122,6 +123,9 @@ const ProductsPage = () => {
       {/* Neon Edge Lines */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-tech-glow/50 to-transparent"></div>
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-tech-accent/30 to-transparent"></div>
+
+      {/* Social Ribbon */}
+      <SocialRibbon variant="tech" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
