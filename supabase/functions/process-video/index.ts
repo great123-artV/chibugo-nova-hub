@@ -12,6 +12,35 @@ serve(async (req) => {
   }
 
   try {
+    // Verify user is authenticated
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    
+    // Create client with user's auth token to respect RLS
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Get the authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Auth error:", userError?.message);
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired session" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Authenticated user:", user.email);
+
     const { videoId, transformations } = await req.json();
 
     if (!videoId) {
@@ -24,15 +53,6 @@ serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Missing Supabase configuration");
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     // Get video upload record
     const { data: video, error: videoError } = await supabase
       .from("video_uploads")
@@ -41,13 +61,22 @@ serve(async (req) => {
       .single();
 
     if (videoError || !video) {
-      console.error("Video fetch error:", videoError);
+      console.error("Video fetch error:", videoError?.message);
       return new Response(
-        JSON.stringify({ error: "Video not found" }),
+        JSON.stringify({ error: "Video not found or access denied" }),
         {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
+      );
+    }
+
+    // Verify ownership - video uploader email must match authenticated user
+    if (video.uploader_email !== user.email) {
+      console.error("Ownership mismatch:", video.uploader_email, "vs", user.email);
+      return new Response(
+        JSON.stringify({ error: "You can only process your own videos" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -70,7 +99,14 @@ serve(async (req) => {
 
     if (downloadError) {
       console.error("Download error:", downloadError);
-      throw new Error("Failed to download video");
+      await supabase
+        .from("video_uploads")
+        .update({ status: "failed" })
+        .eq("id", videoId);
+      return new Response(
+        JSON.stringify({ error: "Failed to download video" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log("Video downloaded, size:", videoData.size);
@@ -91,7 +127,14 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error("Upload error:", uploadError);
-      throw new Error("Failed to upload processed video");
+      await supabase
+        .from("video_uploads")
+        .update({ status: "failed" })
+        .eq("id", videoId);
+      return new Response(
+        JSON.stringify({ error: "Failed to upload processed video" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Update database with completion status
@@ -117,27 +160,8 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Process video error:", error);
-    
-    // Update video status to failed
-    try {
-      const body = await req.clone().json();
-      if (body.videoId) {
-        const supabaseUrl = Deno.env.get("SUPABASE_URL");
-        const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-        if (supabaseUrl && supabaseServiceKey) {
-          const supabase = createClient(supabaseUrl, supabaseServiceKey);
-          await supabase
-            .from("video_uploads")
-            .update({ status: "failed" })
-            .eq("id", body.videoId);
-        }
-      }
-    } catch {}
-
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
+      JSON.stringify({ error: "An error occurred. Please try again." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -161,7 +185,7 @@ async function processVideoWithFFmpeg(videoBlob: Blob, transformations: any): Pr
 
   // Trim video
   if (transformations.trim) {
-    const duration = 100; // Assume 100 seconds for demo, in real app get from video metadata
+    const duration = 100;
     const startTime = (transformations.trim.start / 100) * duration;
     const endTime = (transformations.trim.end / 100) * duration;
     args.push("-ss", startTime.toString(), "-to", endTime.toString());
@@ -232,13 +256,11 @@ async function processVideoWithFFmpeg(videoBlob: Blob, transformations: any): Pr
   console.log("FFmpeg command:", args.join(" "));
 
   try {
-    // Import FFmpeg WASM
     const { FFmpeg } = await import("https://esm.sh/@ffmpeg/ffmpeg@0.12.10");
     const { toBlobURL } = await import("https://esm.sh/@ffmpeg/util@0.12.1");
 
     const ffmpeg = new FFmpeg();
 
-    // Load FFmpeg
     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
@@ -247,34 +269,24 @@ async function processVideoWithFFmpeg(videoBlob: Blob, transformations: any): Pr
 
     console.log("FFmpeg loaded successfully");
 
-    // Write input file
     await ffmpeg.writeFile("input.mp4", videoData);
-
-    // Execute FFmpeg command
     await ffmpeg.exec(args);
-
-    // Read output file
     const output = await ffmpeg.readFile("output.mp4");
 
     console.log("Video processing completed, output size:", output.length);
 
-    // Convert to Blob - output is FileData which can be string or Uint8Array
     let outputData: Uint8Array;
     if (typeof output === "string") {
-      // If output is a string, convert to Uint8Array
       const encoder = new TextEncoder();
       outputData = encoder.encode(output);
     } else {
-      // output is already Uint8Array
       outputData = output as Uint8Array;
     }
     
-    // Create a new Uint8Array copy to ensure it's in the right format
     const finalData = new Uint8Array(outputData);
     return new Blob([finalData], { type: "video/mp4" });
   } catch (error) {
     console.error("FFmpeg processing error:", error);
-    // If FFmpeg fails, return original video
     console.log("Returning original video due to processing error");
     return videoBlob;
   }
