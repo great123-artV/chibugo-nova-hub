@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, X, Send, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Mic, MicOff, Volume2, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TypingIndicator } from "./TypingIndicator";
+import { Link } from "react-router-dom";
+import { Session, User } from "@supabase/supabase-js";
 
 type Message = {
   role: "user" | "assistant";
@@ -24,6 +26,8 @@ export function NovaAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -35,6 +39,24 @@ export function NovaAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     // Initialize speech recognition
@@ -94,7 +116,6 @@ export function NovaAssistant() {
     synthRef.current.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Get available voices and select a professional female voice
     const voices = synthRef.current.getVoices();
     const professionalVoice = voices.find(voice => 
       voice.name.includes('Female') || 
@@ -125,6 +146,12 @@ export function NovaAssistant() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Check if user is authenticated
+    if (!session) {
+      toast.error("Please sign in to use the AI assistant");
+      return;
+    }
+
     const userMessage = input.trim();
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
@@ -135,7 +162,13 @@ export function NovaAssistant() {
         body: { messages: [...messages, { role: "user", content: userMessage }] },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes("401") || error.message?.includes("auth")) {
+          toast.error("Session expired. Please sign in again.");
+          return;
+        }
+        throw error;
+      }
 
       const assistantMessage = data.message.replace(/\*/g, "");
       setMessages((prev) => [
@@ -143,7 +176,6 @@ export function NovaAssistant() {
         { role: "assistant", content: assistantMessage },
       ]);
       
-      // Auto-speak the response
       speakText(assistantMessage);
     } catch (error) {
       console.error("Nova chat error:", error);
@@ -171,105 +203,126 @@ export function NovaAssistant() {
             <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-              <div>
-                <h3 className="font-semibold">Nova AI Assistant</h3>
-                <p className="text-xs opacity-90">Always here to help</p>
+                <div>
+                  <h3 className="font-semibold">Nova AI Assistant</h3>
+                  <p className="text-xs opacity-90">Always here to help</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {isSpeaking && (
+              <div className="flex items-center gap-2">
+                {isSpeaking && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={stopSpeaking}
+                    className="hover:bg-primary-foreground/20 text-primary-foreground"
+                  >
+                    <Volume2 className="h-4 w-4 animate-pulse" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={stopSpeaking}
+                  onClick={() => setIsOpen(false)}
                   className="hover:bg-primary-foreground/20 text-primary-foreground"
                 >
-                  <Volume2 className="h-4 w-4 animate-pulse" />
+                  <X className="h-5 w-5" />
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="hover:bg-primary-foreground/20 text-primary-foreground"
-              >
-                <X className="h-5 w-5" />
-              </Button>
+              </div>
             </div>
-          </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => {
-              if (message.role === "user") {
-                return (
-                  <div key={index} className="flex justify-end">
-                    <div className="max-w-[85%] rounded-lg p-3 break-words bg-primary text-primary-foreground">
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message, index) => {
+                if (message.role === "user") {
+                  return (
+                    <div key={index} className="flex justify-end">
+                      <div className="max-w-[85%] rounded-lg p-3 break-words bg-primary text-primary-foreground">
+                        <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      </div>
                     </div>
+                  );
+                } else {
+                  return (
+                    <div key={index} className="flex items-start gap-2 ml-1">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                        AI
+                      </div>
+                      <div className="w-fit max-w-[85%] rounded-lg p-3 break-words bg-muted text-foreground">
+                        <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+              {isLoading && (
+                <div className="flex items-end gap-2 ml-1">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                    AI
                   </div>
-                );
-              } else {
-                return (
-                  <div key={index} className="flex items-start gap-2 ml-1">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                      AI
-                    </div>
-                    <div className="w-fit max-w-[85%] rounded-lg p-3 break-words bg-muted text-foreground">
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                    </div>
+                  <div className="bg-muted rounded-lg p-3">
+                    <TypingIndicator />
                   </div>
-                );
-              }
-            })}
-            {isLoading && (
-              <div className="flex items-end gap-2 ml-1">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                  AI
                 </div>
-                <div className="bg-muted rounded-lg p-3">
-                  <TypingIndicator />
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {!session ? (
+              <div className="p-4 border-t">
+                <div className="text-center space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Sign in to chat with Nova AI Assistant
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Sign In to Continue
+                    </Link>
+                  </Button>
+                  <div className="text-xs text-muted-foreground">
+                    <p>Or contact us directly:</p>
+                    <p>Gadgets: <a href="tel:08161844109" className="text-primary">08161844109</a></p>
+                    <p>Real Estate: <a href="tel:07045024855" className="text-primary">07045024855</a></p>
+                  </div>
                 </div>
               </div>
+            ) : (
+              <div className="p-4 border-t space-y-2">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSend();
+                  }}
+                  className="flex gap-2"
+                >
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask me anything..."
+                    disabled={isLoading || isListening}
+                    className="flex-1 pl-4"
+                  />
+                  <Button 
+                    type="button" 
+                    size="icon" 
+                    onClick={toggleVoiceInput}
+                    disabled={isLoading}
+                    variant={isListening ? "destructive" : "outline"}
+                  >
+                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                  <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+                {isListening && (
+                  <p className="text-xs text-center text-muted-foreground animate-pulse">
+                    Listening... Speak now
+                  </p>
+                )}
+              </div>
             )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="p-4 border-t space-y-2">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex gap-2"
-            >
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything..."
-                disabled={isLoading || isListening}
-                className="flex-1 pl-4"
-              />
-              <Button 
-                type="button" 
-                size="icon" 
-                onClick={toggleVoiceInput}
-                disabled={isLoading}
-                variant={isListening ? "destructive" : "outline"}
-              >
-                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
-              <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-            {isListening && (
-              <p className="text-xs text-center text-muted-foreground animate-pulse">
-                Listening... Speak now
-              </p>
-            )}
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
       )}
     </>
   );
