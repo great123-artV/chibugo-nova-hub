@@ -232,6 +232,60 @@ export type Database = {
         }
         Relationships: []
       }
+      video_processing_jobs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          expires_at: string | null
+          id: string
+          input_file_path: string
+          input_filename: string
+          output_files: Json | null
+          output_formats: string[] | null
+          output_resolutions: string[] | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          watermark_position: string | null
+          watermark_text: string | null
+          watermark_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string | null
+          id?: string
+          input_file_path: string
+          input_filename: string
+          output_files?: Json | null
+          output_formats?: string[] | null
+          output_resolutions?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          watermark_position?: string | null
+          watermark_text?: string | null
+          watermark_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string | null
+          id?: string
+          input_file_path?: string
+          input_filename?: string
+          output_files?: Json | null
+          output_formats?: string[] | null
+          output_resolutions?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          watermark_position?: string | null
+          watermark_text?: string | null
+          watermark_type?: string | null
+        }
+        Relationships: []
+      }
       video_uploads: {
         Row: {
           created_at: string
