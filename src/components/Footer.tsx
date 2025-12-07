@@ -120,12 +120,12 @@ const Footer = () => {
             <div className="glass rounded-xl p-4 border border-border/50 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Mon - Fri</span>
-                <span className="text-foreground font-medium">9:00 AM - 6:00 PM</span>
+                <span className="text-foreground font-medium">8:00 AM - 5:00 PM</span>
               </div>
               <div className="h-px bg-border/50" />
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Saturday</span>
-                <span className="text-foreground font-medium">10:00 AM - 4:00 PM</span>
+                <span className="text-foreground font-medium">8:00 AM - 5:00 PM</span>
               </div>
               <div className="h-px bg-border/50" />
               <div className="flex justify-between text-sm">

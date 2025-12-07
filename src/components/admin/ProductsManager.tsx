@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Video, Image } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MediaUploader from "./MediaUploader";
 
 interface Product {
   id: string;
@@ -19,6 +20,7 @@ interface Product {
   description: string | null;
   stock: number | null;
   featured: boolean | null;
+  images: string[] | null;
 }
 
 const ProductsManager = () => {
@@ -34,6 +36,7 @@ const ProductsManager = () => {
     description: "",
     stock: "",
     featured: false,
+    images: [] as string[],
   });
 
   useEffect(() => {
@@ -60,6 +63,7 @@ const ProductsManager = () => {
       description: formData.description,
       stock: parseInt(formData.stock),
       featured: formData.featured,
+      images: formData.images,
     };
 
     if (editingProduct) {
@@ -105,6 +109,7 @@ const ProductsManager = () => {
       description: product.description || "",
       stock: product.stock?.toString() || "",
       featured: product.featured || false,
+      images: product.images || [],
     });
     setOpen(true);
   };
@@ -118,9 +123,21 @@ const ProductsManager = () => {
       description: "",
       stock: "",
       featured: false,
+      images: [],
     });
     setEditingProduct(null);
     setOpen(false);
+  };
+
+  const isVideo = (url: string) => {
+    const videoExtensions = [".mp4", ".mov", ".webm", ".mkv", ".avi", ".wmv", ".flv"];
+    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+  };
+
+  const getMediaCount = (images: string[] | null) => {
+    if (!images || images.length === 0) return { images: 0, videos: 0 };
+    const videos = images.filter(isVideo).length;
+    return { images: images.length - videos, videos };
   };
 
   return (
@@ -134,7 +151,7 @@ const ProductsManager = () => {
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
               <p className="text-sm text-muted-foreground">
@@ -213,6 +230,15 @@ const ProductsManager = () => {
                   rows={4}
                 />
               </div>
+              
+              {/* Media Uploader */}
+              <MediaUploader
+                existingMedia={formData.images}
+                onMediaChange={(media) => setFormData({ ...formData, images: media })}
+                bucketName="product-media"
+                folderPath="products"
+              />
+
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
@@ -225,30 +251,47 @@ const ProductsManager = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((product) => (
-          <Card key={product.id}>
-            <CardHeader>
-              <CardTitle className="text-lg flex justify-between items-start">
-                <span>{product.name}</span>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(product.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{product.type}</p>
-              <p className="text-lg font-semibold mt-2">₦{product.price.toLocaleString()}</p>
-              {product.stock !== null && (
-                <p className="text-sm mt-1">Stock: {product.stock}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+        {products.map((product) => {
+          const mediaCount = getMediaCount(product.images);
+          return (
+            <Card key={product.id}>
+              <CardHeader>
+                <CardTitle className="text-lg flex justify-between items-start">
+                  <span>{product.name}</span>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(product.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{product.type}</p>
+                <p className="text-lg font-semibold mt-2">₦{product.price.toLocaleString()}</p>
+                {product.stock !== null && (
+                  <p className="text-sm mt-1">Stock: {product.stock}</p>
+                )}
+                {(mediaCount.images > 0 || mediaCount.videos > 0) && (
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    {mediaCount.images > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Image className="h-3 w-3" /> {mediaCount.images}
+                      </span>
+                    )}
+                    {mediaCount.videos > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Video className="h-3 w-3" /> {mediaCount.videos}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
