@@ -140,8 +140,8 @@ const ContactPage = () => {
               </div>
               <h3 className="font-display font-semibold text-foreground mb-2">Business Hours</h3>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><span className="text-foreground">Mon-Fri:</span> 9AM - 6PM</p>
-                <p><span className="text-foreground">Sat:</span> 10AM - 4PM</p>
+                <p><span className="text-foreground">Mon-Fri:</span> 8AM - 5PM</p>
+                <p><span className="text-foreground">Sat:</span> 8AM - 5PM</p>
                 <p><span className="text-foreground">Sun:</span> Closed</p>
               </div>
             </CardContent>

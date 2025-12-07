@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Video, Image } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MediaUploader from "./MediaUploader";
 
 interface Property {
   id: string;
@@ -19,6 +20,7 @@ interface Property {
   location: string | null;
   description: string | null;
   featured: boolean | null;
+  images: string[] | null;
 }
 
 const PropertiesManager = () => {
@@ -34,6 +36,7 @@ const PropertiesManager = () => {
     location: "",
     description: "",
     featured: false,
+    images: [] as string[],
   });
 
   useEffect(() => {
@@ -60,6 +63,7 @@ const PropertiesManager = () => {
       location: formData.location,
       description: formData.description,
       featured: formData.featured,
+      images: formData.images,
     };
 
     if (editingProperty) {
@@ -105,6 +109,7 @@ const PropertiesManager = () => {
       location: property.location || "",
       description: property.description || "",
       featured: property.featured || false,
+      images: property.images || [],
     });
     setOpen(true);
   };
@@ -118,9 +123,21 @@ const PropertiesManager = () => {
       location: "",
       description: "",
       featured: false,
+      images: [],
     });
     setEditingProperty(null);
     setOpen(false);
+  };
+
+  const isVideo = (url: string) => {
+    const videoExtensions = [".mp4", ".mov", ".webm", ".mkv", ".avi", ".wmv", ".flv"];
+    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+  };
+
+  const getMediaCount = (images: string[] | null) => {
+    if (!images || images.length === 0) return { images: 0, videos: 0 };
+    const videos = images.filter(isVideo).length;
+    return { images: images.length - videos, videos };
   };
 
   return (
@@ -134,7 +151,7 @@ const PropertiesManager = () => {
               Add Property
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingProperty ? 'Edit Property' : 'Add Property'}</DialogTitle>
               <p className="text-sm text-muted-foreground">
@@ -217,6 +234,15 @@ const PropertiesManager = () => {
                   rows={4}
                 />
               </div>
+
+              {/* Media Uploader */}
+              <MediaUploader
+                existingMedia={formData.images}
+                onMediaChange={(media) => setFormData({ ...formData, images: media })}
+                bucketName="property-media"
+                folderPath="properties"
+              />
+
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
@@ -229,30 +255,47 @@ const PropertiesManager = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {properties.map((property) => (
-          <Card key={property.id}>
-            <CardHeader>
-              <CardTitle className="text-lg flex justify-between items-start">
-                <span>{property.title}</span>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(property)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(property.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{property.property_type} - {property.type}</p>
-              <p className="text-lg font-semibold mt-2">₦{property.price.toLocaleString()}</p>
-              {property.location && (
-                <p className="text-sm mt-1">{property.location}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+        {properties.map((property) => {
+          const mediaCount = getMediaCount(property.images);
+          return (
+            <Card key={property.id}>
+              <CardHeader>
+                <CardTitle className="text-lg flex justify-between items-start">
+                  <span>{property.title}</span>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(property)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(property.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{property.property_type} - {property.type}</p>
+                <p className="text-lg font-semibold mt-2">₦{property.price.toLocaleString()}</p>
+                {property.location && (
+                  <p className="text-sm mt-1">{property.location}</p>
+                )}
+                {(mediaCount.images > 0 || mediaCount.videos > 0) && (
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    {mediaCount.images > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Image className="h-3 w-3" /> {mediaCount.images}
+                      </span>
+                    )}
+                    {mediaCount.videos > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Video className="h-3 w-3" /> {mediaCount.videos}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
