@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, X, Send, Loader2, Mic, MicOff, Volume2, LogIn } from "lucide-react";
+import { Sparkles, X, Send, Loader2, Mic, MicOff, Volume2, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TypingIndicator } from "./TypingIndicator";
@@ -191,18 +191,24 @@ export function NovaAssistant() {
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-gradient-to-r from-tech-glow to-tech-accent hover:opacity-90 transition-all duration-300 hover:scale-110"
         >
-          <MessageCircle className="h-6 w-6" />
+          <Sparkles className="h-6 w-6 text-white animate-pulse" />
         </Button>
       )}
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-[600px] h-[90vh] mx-4 flex flex-col shadow-2xl border-2 rounded-lg">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        >
+          <Card 
+            className="w-full max-w-[600px] h-[90vh] mx-4 flex flex-col shadow-2xl border-2 rounded-lg animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
               <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
+                <Sparkles className="h-5 w-5" />
                 <div>
                   <h3 className="font-semibold">Nova AI Assistant</h3>
                   <p className="text-xs opacity-90">Always here to help</p>

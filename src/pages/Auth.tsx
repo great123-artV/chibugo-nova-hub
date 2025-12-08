@@ -18,15 +18,30 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    const checkUserRole = async (session: any) => {
+      if (!session) return;
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (roles) {
         navigate("/admin");
+      } else {
+        navigate("/");
       }
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      checkUserRole(session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/admin");
+        checkUserRole(session);
       }
     });
 

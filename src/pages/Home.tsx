@@ -22,9 +22,7 @@ const HomePage = () => {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
-            <Badge className="mb-6 bg-tech-glow/20 text-tech-glow border-tech-glow/50 px-4 py-2">
-              CHIBUGO COMPUTER TECH / REAL ESTATE
-            </Badge>
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in leading-tight">
               Premium{" "}
               <span className="bg-gradient-to-r from-tech-glow to-tech-accent bg-clip-text text-transparent">Tech</span> &{" "}
@@ -173,7 +171,7 @@ const HomePage = () => {
             <Button asChild size="lg" variant="secondary">
               <Link to="/contact">Contact Us</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
+            <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10 hover:text-white">
               <Link to="/products">Shop Now</Link>
             </Button>
           </div>

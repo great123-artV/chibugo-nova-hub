@@ -38,12 +38,7 @@ const Navigation = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex flex-col text-sm text-right">
-              <span className="text-muted-foreground">Gadgets:</span>
-              <a href="tel:08161844109" className="text-primary hover:underline">
-                08161844109
-              </a>
-            </div>
+{/* Phone number removed */}
             <Button asChild>
               <Link to="/contact">Get Started</Link>
             </Button>
@@ -104,10 +99,7 @@ const Navigation = () => {
               Contact
             </Link>
             <div className="pt-4 space-y-2">
-              <div className="text-sm">
-                <span className="text-muted-foreground">Gadgets: </span>
-                <a href="tel:08161844109" className="text-primary">08161844109</a>
-              </div>
+{/* Mobile Gadgets phone number removed */}
               <div className="text-sm">
                 <span className="text-muted-foreground">Real Estate: </span>
                 <a href="tel:07045024855" className="text-primary">07045024855</a>
