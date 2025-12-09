@@ -130,9 +130,7 @@ const ProductsPage = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="mb-16 text-center">
-          <Badge className="mb-6 glass border-tech-glow/30 text-tech-glow px-6 py-2 text-xs tracking-[0.2em] uppercase font-medium">
-            Tech Division
-          </Badge>
+
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold mb-6 text-gradient-tech">
             Premium Gadgets
           </h1>
