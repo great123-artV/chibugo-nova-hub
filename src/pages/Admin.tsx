@@ -39,8 +39,11 @@ function AppSidebar() {
   const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className={isCollapsed ? "w-14" : "w-60"} collapsible="icon">
+    <Sidebar className={isCollapsed ? "w-14 mt-20 h-[calc(100svh-5rem)]" : "w-60 mt-20 h-[calc(100svh-5rem)]"} collapsible="icon">
       <SidebarContent>
+        <div className="flex items-center justify-end p-2">
+          <SidebarTrigger className="h-6 w-6" />
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarGroupContent>
