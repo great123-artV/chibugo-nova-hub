@@ -165,8 +165,9 @@ export default function VideoEditor() {
 
       setJobStatus("Invoking processing function...");
 
-      const { data, error: invokeError } = await supabase.functions.invoke("video-processor", {
+      const { data, error: invokeError } = await supabase.functions.invoke("process-video", {
         body: {
+          action: 'start-processing', // Explicit action
           inputVideoPath: videoPath,
           watermark: {
             type: watermarkType,

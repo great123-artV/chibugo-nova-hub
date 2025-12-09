@@ -41,8 +41,38 @@ serve(async (req) => {
 
     console.log('Authenticated user:', user.email);
 
-    const { jobId, action } = await req.json();
+    const { jobId, action, inputVideoPath, watermark, formats, resolutions } = await req.json();
     console.log('Action:', action, 'JobId:', jobId);
+
+    if (action === 'start-processing') {
+       // Create a new job record
+       const { data: job, error: createError } = await supabase
+        .from('video_processing_jobs')
+        .insert({
+          user_id: user.id,
+          status: 'processing',
+          original_video_path: inputVideoPath,
+          settings: { watermark, formats, resolutions }
+        })
+        .select()
+        .single();
+      
+      if (createError) {
+        console.error('Job creation error:', createError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create processing job' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Mock processing trigger (since we don't have real backend worker yet)
+      // In a real app, this would trigger a background worker or call an external API
+      
+      return new Response(
+        JSON.stringify({ jobId: job.id, message: "Processing started" }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (action === 'get-status') {
       // Get job status
