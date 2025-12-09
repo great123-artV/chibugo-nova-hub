@@ -96,8 +96,8 @@ export default function VideoEditor() {
         toast.error("Please select a valid video file");
         return;
       }
-      if (selectedFile.size > 500 * 1024 * 1024) {
-        toast.error("File size must be less than 500MB");
+      if (selectedFile.size > 50 * 1024 * 1024) {
+        toast.error("File size must be less than 50MB");
         return;
       }
       setFile(selectedFile);
@@ -125,6 +125,20 @@ export default function VideoEditor() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("You must be logged in to process videos.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // Verify admin status
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roles) {
+        toast.error("Unauthorized: Only admins can upload videos.");
         setIsProcessing(false);
         return;
       }
