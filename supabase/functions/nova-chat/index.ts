@@ -60,10 +60,27 @@ BEHAVIOR:
 - Direct people to our office or phone numbers for specific inquiries.
 - Give short, clear answers. No markdown (* or #).`;
 
+    // 4. Fetch Inventory Context
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('name, price, stock, type')
+      .gt('stock', 0)
+      .limit(50);
+
+    let inventoryContext = "";
+    if (products && products.length > 0) {
+      inventoryContext = "\n\nCURRENT INVENTORY (Use this to answer questions about price and availability):\n";
+      products.forEach((p: any) => {
+        inventoryContext += `- ${p.name} (${p.type}): ₦${p.price.toLocaleString()} | Stock: ${p.stock}\n`;
+      });
+    }
+
+    const finalSystemPrompt = systemPrompt + inventoryContext;
+
     // 4. Call Google Gemini API
     // Using gemini-1.5-flash for stability and speed
     const geminiContent = [
-      { role: "user", parts: [{ text: systemPrompt }] },
+      { role: "user", parts: [{ text: finalSystemPrompt }] },
       { role: "model", parts: [{ text: "Understood. I am Nova." }] },
       ...messages.map((msg: any) => ({
         role: msg.role === "assistant" ? "model" : "user",

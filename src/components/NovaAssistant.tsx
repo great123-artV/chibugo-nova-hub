@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Sparkles, X, Send, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
+import { Sparkles, X, Send, Loader2, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TypingIndicator } from "./TypingIndicator";
@@ -26,6 +26,7 @@ export function NovaAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -185,7 +186,9 @@ export function NovaAssistant() {
         { role: "assistant", content: assistantMessage },
       ]);
       
-      speakText(assistantMessage);
+      if (isVoiceEnabled) {
+        speakText(assistantMessage);
+      }
     } catch (error) {
       console.error("Nova chat error:", error);
       toast.error(error.message || "Failed to get response from Nova. Please try again.");
@@ -305,6 +308,16 @@ export function NovaAssistant() {
                     variant={isListening ? "destructive" : "outline"}
                   >
                     {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    size="icon" 
+                    onClick={() => setIsVoiceEnabled(!isVoiceEnabled)}
+                    className={isVoiceEnabled ? "bg-primary text-primary-foreground" : "text-muted-foreground"}
+                    variant="outline"
+                    title={isVoiceEnabled ? "Mute Voice Response" : "Enable Voice Response"}
+                  >
+                    {isVoiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                   </Button>
                   <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
                     <Send className="h-4 w-4" />
