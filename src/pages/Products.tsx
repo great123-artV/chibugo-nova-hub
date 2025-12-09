@@ -124,9 +124,6 @@ const ProductsPage = () => {
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-tech-glow/50 to-transparent"></div>
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-tech-accent/30 to-transparent"></div>
 
-      {/* Social Ribbon */}
-      <SocialRibbon variant="tech" />
-
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="mb-16 text-center">
@@ -256,6 +253,9 @@ const ProductsPage = () => {
           </div>
         )}
       </div>
+      
+      {/* Social Ribbon */}
+      <SocialRibbon variant="tech" />
     </div>
   );
 };

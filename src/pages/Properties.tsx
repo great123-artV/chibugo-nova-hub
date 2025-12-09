@@ -142,9 +142,6 @@ const PropertiesPage = () => {
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-estate-gold/30 to-transparent"></div>
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-estate-warm/20 to-transparent"></div>
 
-      {/* Social Ribbon */}
-      <SocialRibbon variant="estate" />
-
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="mb-16 text-center">
@@ -275,6 +272,9 @@ const PropertiesPage = () => {
           </div>
         )}
       </div>
+      
+      {/* Social Ribbon */}
+      <SocialRibbon variant="estate" />
     </div>
   );
 };
