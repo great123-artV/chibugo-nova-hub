@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +8,39 @@ import { Laptop, Smartphone, Home, CheckCircle, TrendingUp, Shield } from "lucid
 import techHero from "@/assets/tech-hero.jpg";
 
 const HomePage = () => {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        checkUserRole(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        checkUserRole(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkUserRole = async (userId: string) => {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roles) {
+      setIsAdmin(true);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -177,6 +212,18 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+
+      {/* Admin Section */}
+      {isAdmin && (
+        <section className="py-8 bg-background border-t">
+          <div className="container mx-auto px-4 text-center">
+            <Button asChild size="lg" variant="default" className="w-full sm:w-auto">
+              <Link to="/admin">Admin Page</Link>
+            </Button>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

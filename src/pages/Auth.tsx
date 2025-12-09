@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,29 +16,19 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const checkUserRole = async (currentSession: any) => {
       if (!currentSession) {
-        setIsAdmin(false);
         setIsChecking(false);
         return;
       }
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", currentSession.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (roles) {
-        setIsAdmin(true);
-      } else {
-        // Non-admin logic: continue surfing (redirect to home)
+      if (currentSession) {
         navigate("/");
+        return;
       }
       setIsChecking(false);
     };
@@ -122,29 +112,7 @@ const Auth = () => {
     );
   }
 
-  if (isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md text-center p-6 space-y-6">
-          <CardHeader>
-            <CardTitle>Welcome Administrator</CardTitle>
-            <CardDescription>You are signed in as an admin.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-             <Button asChild className="w-full" size="lg">
-              <Link to="/admin">Go to Admin Dashboard</Link>
-            </Button>
-            <Button variant="outline" className="w-full" onClick={() => navigate("/")}>
-              Go to Home
-            </Button>
-            <Button variant="ghost" className="w-full" onClick={() => supabase.auth.signOut()}>
-              Sign Out
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
