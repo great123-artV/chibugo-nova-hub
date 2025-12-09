@@ -35,6 +35,11 @@ const ContactPage = () => {
 
       if (error) throw error;
 
+      // Send email notification to admins
+      await supabase.functions.invoke("send-contact-email", {
+        body: formData,
+      });
+
       toast({
         title: "Message Sent!",
         description: "We'll get back to you as soon as possible.",
