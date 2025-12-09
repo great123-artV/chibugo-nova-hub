@@ -11,8 +11,11 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-primary">Chibugo</div>
-            <div className="text-sm text-muted-foreground hidden md:block">Computers & Real Estate</div>
+            <img src="/logo.jpg" alt="Chibugo Logo" className="h-10 w-10 object-contain rounded-md" />
+            <div>
+              <div className="text-2xl font-bold text-primary">Chibugo</div>
+              <div className="text-sm text-muted-foreground hidden md:block">Computers & Real Estate</div>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -35,12 +38,13 @@ const Navigation = () => {
             <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
               Contact
             </Link>
+
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
 {/* Phone number removed */}
             <Button asChild>
-              <Link to="/contact">Get Started</Link>
+              <Link to="/auth">Get Started</Link>
             </Button>
           </div>
 
@@ -63,6 +67,7 @@ const Navigation = () => {
             >
               Home
             </Link>
+
             <Link
               to="/products"
               className="block py-2 text-foreground hover:text-primary transition-colors"
@@ -98,6 +103,7 @@ const Navigation = () => {
             >
               Contact
             </Link>
+
             <div className="pt-4 space-y-2">
 {/* Mobile Gadgets phone number removed */}
               <div className="text-sm">

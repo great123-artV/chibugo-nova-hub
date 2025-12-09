@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Sparkles, X, Send, Loader2, Mic, MicOff, Volume2, LogIn } from "lucide-react";
+import { Sparkles, X, Send, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TypingIndicator } from "./TypingIndicator";
-import { Link } from "react-router-dom";
+
 import { Session, User } from "@supabase/supabase-js";
 
 type Message = {
@@ -199,11 +199,11 @@ export function NovaAssistant() {
 
       {isOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center md:justify-end bg-black/60 backdrop-blur-sm p-4 pb-24 md:pb-6 md:pr-6"
           onClick={() => setIsOpen(false)}
         >
           <Card 
-            className="w-full max-w-[600px] h-[90vh] mx-4 flex flex-col shadow-2xl border-2 rounded-lg animate-in fade-in zoom-in-95 duration-200"
+            className="w-full md:w-[400px] h-[85vh] md:h-[50vh] flex flex-col shadow-2xl border-2 rounded-lg animate-in fade-in slide-in-from-bottom-10 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
@@ -272,27 +272,7 @@ export function NovaAssistant() {
               <div ref={messagesEndRef} />
             </div>
 
-            {!session ? (
-              <div className="p-4 border-t">
-                <div className="text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Sign in to chat with Nova AI Assistant
-                  </p>
-                  <Button asChild className="w-full">
-                    <Link to="/auth" onClick={() => setIsOpen(false)}>
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Sign In to Continue
-                    </Link>
-                  </Button>
-                  <div className="text-xs text-muted-foreground">
-                    <p>Or contact us directly:</p>
-                    <p>Gadgets: <a href="tel:08161844109" className="text-primary">08161844109</a></p>
-                    <p>Real Estate: <a href="tel:07045024855" className="text-primary">07045024855</a></p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 border-t space-y-2">
+            <div className="p-4 border-t space-y-2">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -326,7 +306,6 @@ export function NovaAssistant() {
                   </p>
                 )}
               </div>
-            )}
           </Card>
         </div>
       )}

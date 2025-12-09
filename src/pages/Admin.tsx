@@ -148,10 +148,16 @@ const Admin = () => {
               <SidebarTrigger />
               <h1 className="text-xl font-semibold">Admin Dashboard</h1>
             </div>
-            <Button variant="outline" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" onClick={() => navigate("/")}>
+                <Home className="mr-2 h-4 w-4" />
+                View Site
+              </Button>
+              <Button variant="outline" onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </header>
           <main className="flex-1 p-6">
             {renderContent()}
