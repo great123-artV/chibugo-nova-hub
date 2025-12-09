@@ -148,9 +148,7 @@ const PropertiesPage = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="mb-16 text-center">
-          <Badge className="mb-6 glass border-estate-gold/30 text-estate-gold px-6 py-2 text-xs tracking-[0.2em] uppercase font-medium">
-            Real Estate Division
-          </Badge>
+
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold mb-6 text-gradient-estate">
             Luxury Properties
           </h1>
