@@ -29,6 +29,7 @@ export function NovaAssistant() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
 
@@ -39,6 +40,14 @@ export function NovaAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -179,7 +188,7 @@ export function NovaAssistant() {
       speakText(assistantMessage);
     } catch (error) {
       console.error("Nova chat error:", error);
-      toast.error("Failed to get response from Nova. Please try again.");
+      toast.error(error.message || "Failed to get response from Nova. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -281,6 +290,7 @@ export function NovaAssistant() {
                   className="flex gap-2"
                 >
                   <Input
+                    ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask me anything..."

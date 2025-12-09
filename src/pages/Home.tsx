@@ -206,7 +206,7 @@ const HomePage = () => {
             <Button asChild size="lg" variant="secondary">
               <Link to="/contact">Contact Us</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10 hover:text-white">
+            <Button asChild size="lg" variant="secondary">
               <Link to="/products">Shop Now</Link>
             </Button>
           </div>
