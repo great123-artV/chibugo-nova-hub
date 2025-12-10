@@ -38,8 +38,6 @@ const InquiriesManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this inquiry?")) return;
-
     const { error } = await supabase
       .from("inquiries")
       .delete()
