@@ -73,9 +73,7 @@ const HomePage = () => {
               <Button asChild size="lg" className="bg-gradient-to-r from-estate-gold to-estate-earth hover:opacity-90 text-white">
                 <Link to="/properties">View Properties</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="border-foreground/30">
-                <Link to="/contact">Contact Us</Link>
-              </Button>
+
             </div>
           </div>
         </div>
