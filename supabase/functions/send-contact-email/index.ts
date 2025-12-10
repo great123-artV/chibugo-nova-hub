@@ -77,14 +77,49 @@ serve(async (req) => {
         to: adminEmails,
         subject: `New Inquiry from ${name}`,
         html: `
-          <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone || "N/A"}</p>
-          <p><strong>Message:</strong></p>
-          <blockquote style="background: #f9f9f9; padding: 10px; border-left: 5px solid #ccc;">
-            ${message.replace(/\n/g, "<br>")}
-          </blockquote>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; background-color: #fff;">
+            <div style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
+              <h1 style="color: #333; font-size: 24px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Internal Discussion Memorandum</h1>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr>
+                <td style="font-weight: bold; width: 80px; padding: 5px 0; color: #666;">TO:</td>
+                <td style="padding: 5px 0;">Administration Team</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; width: 80px; padding: 5px 0; color: #666;">FROM:</td>
+                <td style="padding: 5px 0;">Chibugo Nova Automated System</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; width: 80px; padding: 5px 0; color: #666;">DATE:</td>
+                <td style="padding: 5px 0;">${new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; width: 80px; padding: 5px 0; color: #666;">SUBJECT:</td>
+                <td style="padding: 5px 0;"><strong>Inquiry Received: ${name}</strong></td>
+              </tr>
+            </table>
+
+            <div style="border-top: 1px solid #eee; margin-top: 10px; padding-top: 20px;">
+              <p style="margin-bottom: 15px; color: #333;">This memorandum serves to notify the administration of a new client inquiry received via the corporate website. The particulars are as follows:</p>
+              
+              <div style="background-color: #f8f9fa; border-left: 4px solid #0f172a; padding: 15px; margin-bottom: 20px;">
+                <p style="margin: 5px 0;"><strong>Client Name:</strong> ${name}</p>
+                <p style="margin: 5px 0;"><strong>Email Address:</strong> ${email}</p>
+                <p style="margin: 5px 0;"><strong>Contact Number:</strong> ${phone || "Not Provided"}</p>
+              </div>
+
+              <h3 style="color: #333; font-size: 16px; margin-bottom: 10px; text-transform: uppercase;">Message Content</h3>
+              <div style="font-style: italic; color: #555; line-height: 1.6; padding: 10px; background-color: #fff; border: 1px solid #eee;">
+                "${message.replace(/\n/g, "<br>")}"
+              </div>
+
+              <p style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; font-size: 12px; color: #999; text-align: center;">
+                CONFIDENTIALITY NOTICE: The information contained in this message is privileged and confidential, intended only for the use of the individual or entity named above.
+              </p>
+            </div>
+          </div>
         `,
       }),
     });

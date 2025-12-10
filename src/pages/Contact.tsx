@@ -36,9 +36,18 @@ const ContactPage = () => {
       if (error) throw error;
 
       // Send email notification to admins
-      await supabase.functions.invoke("send-contact-email", {
+      console.log("Invoking 'send-contact-email' with:", formData);
+      const { data, error: functionError } = await supabase.functions.invoke("send-contact-email", {
         body: formData,
       });
+
+      if (functionError) {
+        console.error("Edge Function Error:", functionError);
+        // We generally don't block the UI success if email fails, but it's good to know.
+        // If critical, we could throw here.
+      } else {
+        console.log("Edge Function Response:", data);
+      }
 
       toast({
         title: "Message Sent!",
