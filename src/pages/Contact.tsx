@@ -41,10 +41,13 @@ const ContactPage = () => {
         body: formData,
       });
 
-      if (functionError) {
-        console.error("Edge Function Error:", functionError);
-        // We generally don't block the UI success if email fails, but it's good to know.
-        // If critical, we could throw here.
+      if (functionError || (data && !data.id && !data.message?.includes("received"))) {
+        console.error("Edge Function Error:", functionError || data);
+        toast({
+          title: "Message Saved",
+          description: "Note: Admin notification email could not be sent. Please check logs.",
+          variant: "destructive", // Warning style
+        });
       } else {
         console.log("Edge Function Response:", data);
       }
