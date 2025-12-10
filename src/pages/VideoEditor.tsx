@@ -151,7 +151,10 @@ export default function VideoEditor() {
         .from("videos")
         .upload(videoPath, file);
 
-      if (videoError) throw videoError;
+      if (videoError) {
+        console.error("Storage Upload Error:", videoError);
+        throw new Error(`Upload failed: ${videoError.message}`);
+      }
 
       let watermarkPath: string | null = null;
       if (watermarkType === "logo" && watermarkLogo) {
@@ -160,7 +163,11 @@ export default function VideoEditor() {
         const { error: logoError } = await supabase.storage
           .from("watermarks")
           .upload(watermarkPath, watermarkLogo);
-        if (logoError) throw logoError;
+        
+        if (logoError) {
+          console.error("Watermark Upload Error:", logoError);
+          throw new Error(`Watermark upload failed: ${logoError.message}`);
+        }
       }
 
       setJobStatus("Invoking processing function...");
@@ -180,13 +187,16 @@ export default function VideoEditor() {
         },
       });
 
-      if (invokeError) throw invokeError;
+      if (invokeError) {
+        console.error("Edge Function Error:", invokeError);
+        throw new Error(`Processing start failed: ${invokeError.message || "Unknown Edge Function error"}`);
+      }
 
       setJobStatus("Processing started. Please wait.");
       pollJobStatus(data.jobId);
 
     } catch (error: any) {
-      console.error("Error:", error);
+      console.error("Process Video Error:", error);
       toast.error(error.message || "An error occurred during processing.");
       setIsProcessing(false);
     }
