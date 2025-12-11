@@ -18,6 +18,7 @@ interface Product {
   price: number;
   images: string[];
   stock: number;
+  video_url?: string;
   specs: any;
 }
 
@@ -188,12 +189,18 @@ const ProductsPage = () => {
                 <div className="absolute bottom-0 right-0 w-px h-12 bg-gradient-to-t from-tech-accent/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                 <CardHeader className="p-0 relative">
-                  <div className="aspect-square bg-gradient-to-br from-muted/30 to-tech-dark/50 relative overflow-hidden">
-                    {product.images?.[0] ? (
+                  <div className="aspect-square bg-gradient-to-br from-muted/30 to-tech-dark/50 relative overflow-hidden group-hover:scale-105 transition-transform duration-700">
+                    {product.video_url ? (
+                      <video 
+                        src={product.video_url} 
+                        controls 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : product.images?.[0] ? (
                       <img 
                         src={product.images[0]} 
                         alt={product.name} 
-                        className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-contain p-6"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

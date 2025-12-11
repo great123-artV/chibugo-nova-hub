@@ -20,6 +20,7 @@ interface Property {
   images: string[];
   description: string | null;
   featured: boolean | null;
+  video_url?: string;
 }
 
 const PropertiesPage = () => {
@@ -207,12 +208,18 @@ const PropertiesPage = () => {
                 <div className="absolute top-0 right-0 w-px h-12 bg-gradient-to-b from-estate-gold/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <CardHeader className="p-0 relative">
-                  <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-muted/20 to-estate-luxury">
-                    {property.images?.[0] ? (
+                  <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-muted/20 to-estate-luxury group-hover:scale-105 transition-transform duration-700">
+                    {property.video_url ? (
+                      <video 
+                        src={property.video_url} 
+                        controls 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : property.images?.[0] ? (
                       <img
                         src={property.images[0]}
                         alt={property.title}
-                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700"
+                        className="object-cover w-full h-full"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
