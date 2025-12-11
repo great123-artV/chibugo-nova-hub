@@ -146,15 +146,43 @@ export default function VideoEditor() {
       const timestamp = Date.now();
       const videoPath = `${session.user.id}/${timestamp}-${file.name}`;
 
-      // Upload video
-      const { error: videoError } = await supabase.storage
+      // Upload video with progress tracking using Signed URL + XHR
+      // 1. Get signed upload URL
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from("videos")
-        .upload(videoPath, file);
+        .createSignedUploadUrl(videoPath);
 
-      if (videoError) {
-        console.error("Storage Upload Error:", videoError);
-        throw new Error(`Upload failed: ${videoError.message}`);
+      if (signedUrlError) {
+         console.error("Signed URL Error:", signedUrlError);
+         throw new Error(`Failed to get upload URL: ${signedUrlError.message}`);
       }
+      
+      const uploadUrl = signedUrlData.signedUrl;
+
+      // 2. Upload using XHR
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(true);
+          } else {
+             reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.send(file);
+      });
 
       let watermarkPath: string | null = null;
       if (watermarkType === "logo" && watermarkLogo) {
@@ -326,7 +354,13 @@ export default function VideoEditor() {
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {jobStatus} ({uploadProgress > 0 && uploadProgress < 100 ? `Uploading ${uploadProgress}%` : ''})
+                    {jobStatus}
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                      <span className="ml-2 text-xs opacity-90">({uploadProgress}%)</span>
+                    )}
+                    {uploadProgress === 100 && jobStatus.includes("Uploading") && (
+                      <span className="ml-2 text-xs opacity-90">(Finishing...)</span>
+                    )}
                   </>
                 ) : (
                   <>
