@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,19 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Video, Download, Loader2, Play, Settings, Droplet, Film, Scaling, Share2, Laptop, Home } from "lucide-react";
+import { Upload, Video, Download, Loader2, Play, Settings, Droplet, Film, Scaling } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function VideoEditor() {
   const [file, setFile] = useState<File | null>(null);
@@ -55,48 +44,6 @@ export default function VideoEditor() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!roles) {
-        toast.error("Access Denied: You must be an admin to access the video editor.");
-        navigate("/");
-        return;
-      }
-    } catch (error) {
-      console.error("Auth check error:", error);
-      navigate("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -155,43 +102,12 @@ export default function VideoEditor() {
       const timestamp = Date.now();
       const videoPath = `${session.user.id}/${timestamp}-${file.name}`;
 
-      // Upload video with progress tracking using Signed URL + XHR
-      // 1. Get signed upload URL
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      // Upload video
+      const { error: videoError } = await supabase.storage
         .from("videos")
-        .createSignedUploadUrl(videoPath);
+        .upload(videoPath, file);
 
-      if (signedUrlError) {
-         console.error("Signed URL Error:", signedUrlError);
-         throw new Error(`Failed to get upload URL: ${signedUrlError.message}`);
-      }
-      
-      const uploadUrl = signedUrlData.signedUrl;
-
-      // 2. Upload using XHR
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-        
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(percentComplete);
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(true);
-          } else {
-             reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
-        };
-
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.send(file);
-      });
+      if (videoError) throw videoError;
 
       let watermarkPath: string | null = null;
       if (watermarkType === "logo" && watermarkLogo) {
@@ -200,11 +116,7 @@ export default function VideoEditor() {
         const { error: logoError } = await supabase.storage
           .from("watermarks")
           .upload(watermarkPath, watermarkLogo);
-        
-        if (logoError) {
-          console.error("Watermark Upload Error:", logoError);
-          throw new Error(`Watermark upload failed: ${logoError.message}`);
-        }
+        if (logoError) throw logoError;
       }
 
       setJobStatus("Invoking processing function...");
@@ -224,87 +136,15 @@ export default function VideoEditor() {
         },
       });
 
-      if (invokeError) {
-        console.error("Edge Function Error:", invokeError);
-        throw new Error(`Processing start failed: ${invokeError.message || "Unknown Edge Function error"}`);
-      }
+      if (invokeError) throw invokeError;
 
       setJobStatus("Processing started. Please wait.");
       pollJobStatus(data.jobId);
 
     } catch (error: any) {
-      console.error("Process Video Error:", error);
+      console.error("Error:", error);
       toast.error(error.message || "An error occurred during processing.");
       setIsProcessing(false);
-    }
-  };
-
-  // Publishing Stte
-  const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [publishType, setPublishType] = useState<"product" | "property" | null>(null);
-  const [publishData, setPublishData] = useState({
-    name: "",
-    price: "",
-    description: "",
-    type: "laptop", // default for product
-    propertyType: "sale" // default for property
-  });
-
-  const handlePublishClick = () => {
-    setShowPublishDialog(true);
-  };
-
-  const resetPublishForm = () => {
-     setPublishType(null);
-     setPublishData({
-       name: "",
-       price: "",
-       description: "",
-       type: "laptop",
-       propertyType: "sale"
-     });
-     setShowPublishDialog(false);
-  };
-
-  const handlePublishSubmit = async () => {
-    if (!processedFiles.length) {
-      toast.error("No processed video found.");
-      return;
-    }
-    const videoUrl = processedFiles[0].url; // Use the first processed file
-
-    try {
-      if (publishType === "product") {
-        const { error } = await supabase.from("products").insert({
-          name: publishData.name,
-          price: parseFloat(publishData.price) || 0,
-          description: publishData.description,
-          type: publishData.type,
-          video_url: videoUrl,
-          stock: 1, // Default stock
-          specs: {},
-          images: [], // No images initially
-          brand: "Generic" 
-        });
-        if (error) throw error;
-        toast.success("Published as Product successfully!");
-      } else if (publishType === "property") {
-        const { error } = await supabase.from("properties").insert({
-          title: publishData.name, // using name field for title
-          price: parseFloat(publishData.price) || 0,
-          description: publishData.description,
-          type: publishData.propertyType,
-          video_url: videoUrl,
-          location: "Lagos", // Default
-          images: []
-        });
-        if (error) throw error;
-        toast.success("Published as Property successfully!");
-      }
-      resetPublishForm();
-    } catch (error: any) {
-      console.error("Publish Error:", error);
-      toast.error(`Failed to publish: ${error.message}`);
     }
   };
 
@@ -314,30 +154,55 @@ export default function VideoEditor() {
       setJobStatus("completed");
       toast.success("Processing complete!");
       setIsProcessing(false);
-      // Automatically add the processed file to the list for now
-      // In a real app, we'd fetch the actual URL from the job result
-      // But for this demo, we'll assume the input file path is somewhat valid or just mock it
-      // Actually, since we don't get the real output path back in this mocked poll,
-      // we'll simulate a "processed" URL.
-      // Ideally we should use the URL from the DB job record.
-      // But let's just use the preview URL if available or a placeholder.
-      if (videoPreviewUrl) {
-          setProcessedFiles([{
-              path: "processed_video.mp4", 
-              url: videoPreviewUrl, // Using preview URL as "processed" URL for immediate feedback in this demo context
-              format: "mp4",
-              resolution: "1080p",
-              size: file?.size || 0
-          }]);
-      }
     }, 3000);
   };
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roles) {
+        toast.error("Access Denied: You must be an admin to access the video editor.");
+        navigate("/");
+        return;
+      }
+    } catch (error) {
+      console.error("Auth check error:", error);
+      navigate("/");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log("VideoEditor: Rendering. Loading:", loading);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      <main className="flex-1 pt-20">
-        <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <div className="container mx-auto px-4 py-12 max-w-6xl animate-fade-in">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Video Processing Engine</h1>
             <p className="text-muted-foreground">
@@ -444,28 +309,11 @@ export default function VideoEditor() {
                 </CardContent>
               </Card>
 
-              <Button 
-                onClick={jobStatus === "completed" ? handlePublishClick : handleUploadAndProcess} 
-                disabled={!file || (isProcessing && jobStatus !== "completed")} 
-                className="w-full" 
-                size="lg"
-                variant={jobStatus === "completed" ? "secondary" : "default"}
-              >
+              <Button onClick={handleUploadAndProcess} disabled={!file || isProcessing} className="w-full" size="lg">
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {jobStatus}
-                    {uploadProgress > 0 && uploadProgress < 100 && (
-                      <span className="ml-2 text-xs opacity-90">({uploadProgress}%)</span>
-                    )}
-                    {uploadProgress === 100 && jobStatus.includes("Uploading") && (
-                      <span className="ml-2 text-xs opacity-90">(Finishing...)</span>
-                    )}
-                  </>
-                ) : jobStatus === "completed" ? (
-                  <>
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Publish Video
+                    {jobStatus} ({uploadProgress > 0 && uploadProgress < 100 ? `Uploading ${uploadProgress}%` : ''})
                   </>
                 ) : (
                   <>
@@ -481,7 +329,7 @@ export default function VideoEditor() {
             <Card className="mt-8">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Download className="h-5 w-5" />Download Processed Videos</CardTitle>
-                <CardDescription>Your videos are ready for download or publishing.</CardDescription>
+                <CardDescription>Your videos are ready for download. They will be available for 24-48 hours.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -501,91 +349,6 @@ export default function VideoEditor() {
             </Card>
           )}
         </div>
-      </main>
-      <Footer />
-
-      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Publish Video</DialogTitle>
-            <DialogDescription>
-              Choose where you want to publish this video.
-            </DialogDescription>
-          </DialogHeader>
-
-          {!publishType ? (
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <Button onClick={() => setPublishType("product")} variant="outline" className="h-24 flex flex-col gap-2 hover:border-tech-glow hover:bg-tech-glow/10">
-                <Laptop className="h-8 w-8 text-tech-glow" />
-                As Product
-              </Button>
-              <Button onClick={() => setPublishType("property")} variant="outline" className="h-24 flex flex-col gap-2 hover:border-estate-gold hover:bg-estate-gold/10">
-                <Home className="h-8 w-8 text-estate-gold" />
-                As Property
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Title / Name</Label>
-                <Input 
-                  value={publishData.name} 
-                  onChange={(e) => setPublishData({...publishData, name: e.target.value})}
-                  placeholder={publishType === "product" ? "Product Name" : "Property Title"}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Price (₦)</Label>
-                <Input 
-                  type="number"
-                  value={publishData.price} 
-                  onChange={(e) => setPublishData({...publishData, price: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea 
-                  value={publishData.description} 
-                  onChange={(e) => setPublishData({...publishData, description: e.target.value})}
-                />
-              </div>
-              
-              {publishType === "product" && (
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <Select value={publishData.type} onValueChange={(v) => setPublishData({...publishData, type: v})}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="laptop">Laptop</SelectItem>
-                      <SelectItem value="phone">Phone</SelectItem>
-                      <SelectItem value="accessory">Accessory</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {publishType === "property" && (
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <Select value={publishData.propertyType} onValueChange={(v) => setPublishData({...publishData, propertyType: v})}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sale">For Sale</SelectItem>
-                      <SelectItem value="rent">For Rent</SelectItem>
-                      <SelectItem value="commercial">Commercial</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setPublishType(null)}>Back</Button>
-                <Button onClick={handlePublishSubmit}>Publish</Button>
-              </DialogFooter>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
