@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2 } from "lucide-react";
 
 interface Inquiry {
   id: string;
@@ -37,20 +35,6 @@ const InquiriesManager = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("inquiries")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast({ variant: "destructive", title: "Error deleting inquiry", description: error.message });
-    } else {
-      toast({ title: "Inquiry deleted" });
-      setInquiries(inquiries.filter((i) => i.id !== id));
-    }
-  };
-
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Inquiries</h2>
@@ -58,24 +42,16 @@ const InquiriesManager = () => {
       <div className="grid grid-cols-1 gap-4">
         {inquiries.map((inquiry) => (
           <Card key={inquiry.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-semibold">{inquiry.name}</CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(inquiry.id)}
-                className="text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+            <CardHeader>
+              <CardTitle className="text-lg">{inquiry.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm mt-3">
+              <div className="space-y-2 text-sm">
                 <p><strong>Email:</strong> {inquiry.email}</p>
                 {inquiry.phone && <p><strong>Phone:</strong> {inquiry.phone}</p>}
-                <p className="whitespace-pre-wrap"><strong>Message:</strong> {inquiry.message}</p>
+                <p><strong>Message:</strong> {inquiry.message}</p>
                 {inquiry.created_at && (
-                  <p className="text-muted-foreground pt-2 text-xs">
+                  <p className="text-muted-foreground">
                     Received: {new Date(inquiry.created_at).toLocaleString()}
                   </p>
                 )}
@@ -83,9 +59,6 @@ const InquiriesManager = () => {
             </CardContent>
           </Card>
         ))}
-        {inquiries.length === 0 && (
-          <p className="text-muted-foreground">No inquiries found.</p>
-        )}
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { MapPin, Search, Home, Building2, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SocialRibbon from "@/components/SocialRibbon";
+import { VideoThumbnail } from "@/components/ui/VideoThumbnail";
 
 interface Property {
   id: string;
@@ -20,7 +21,6 @@ interface Property {
   images: string[];
   description: string | null;
   featured: boolean | null;
-  video_url?: string;
 }
 
 const PropertiesPage = () => {
@@ -208,19 +208,21 @@ const PropertiesPage = () => {
                 <div className="absolute top-0 right-0 w-px h-12 bg-gradient-to-b from-estate-gold/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <CardHeader className="p-0 relative">
-                  <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-muted/20 to-estate-luxury group-hover:scale-105 transition-transform duration-700">
-                    {property.video_url ? (
-                      <video 
-                        src={property.video_url} 
-                        controls 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : property.images?.[0] ? (
-                      <img
-                        src={property.images[0]}
-                        alt={property.title}
-                        className="object-cover w-full h-full"
-                      />
+                  <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-muted/20 to-estate-luxury">
+                    {property.images?.[0] ? (
+                      property.images[0].match(/\.(mp4|mov|webm|ogg|mkv|avi|wmv|flv)($|\?)/i) ? (
+                        <VideoThumbnail
+                          src={property.images[0]}
+                          className="w-full h-full"
+                          alt={property.title}
+                        />
+                      ) : (
+                        <img
+                          src={property.images[0]}
+                          alt={property.title}
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700"
+                        />
+                      )
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Home className="w-20 h-20 text-estate-gold/20" />

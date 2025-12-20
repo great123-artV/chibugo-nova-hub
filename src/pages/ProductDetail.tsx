@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { VideoThumbnail } from "@/components/ui/VideoThumbnail";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ArrowLeft, Laptop, Smartphone, CheckCircle } from "lucide-react";
@@ -112,11 +113,18 @@ const ProductDetailPage = () => {
                   {product.images.map((image, index) => (
                     <CarouselItem key={index}>
                       <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                        <img 
-                          src={image} 
-                          alt={`${product.name} - ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
+                        {image.match(/\.(mp4|mov|webm|ogg|mkv|avi|wmv|flv)($|\?)/i) ? (
+                          <VideoThumbnail 
+                            src={image} 
+                            className="w-full h-full"
+                          />
+                        ) : (
+                          <img 
+                            src={image} 
+                            alt={`${product.name} - ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                       </div>
                     </CarouselItem>
                   ))}

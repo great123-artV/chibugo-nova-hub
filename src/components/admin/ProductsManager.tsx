@@ -130,8 +130,7 @@ const ProductsManager = () => {
   };
 
   const isVideo = (url: string) => {
-    const videoExtensions = [".mp4", ".mov", ".webm", ".mkv", ".avi", ".wmv", ".flv"];
-    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+    return /\.(mp4|mov|webm|mkv|avi|wmv|flv)($|\?)/i.test(url);
   };
 
   const getMediaCount = (images: string[] | null) => {
@@ -235,7 +234,7 @@ const ProductsManager = () => {
               <MediaUploader
                 existingMedia={formData.images}
                 onMediaChange={(media) => setFormData({ ...formData, images: media })}
-                bucketName="product-media"
+                bucketName="media"
                 folderPath="products"
               />
 

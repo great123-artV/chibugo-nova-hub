@@ -108,8 +108,8 @@ const MediaUploader = ({
   };
 
   const isVideo = (url: string) => {
-    const videoExtensions = [".mp4", ".mov", ".webm", ".mkv", ".avi", ".wmv", ".flv"];
-    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+    // Robust check for file extension, allowing for query parameters
+    return /\.(mp4|mov|webm|mkv|avi|wmv|flv)($|\?)/i.test(url);
   };
 
   return (

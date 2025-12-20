@@ -76,7 +76,6 @@ const HomePage = () => {
               <Button asChild variant="outline" size="lg" className="border-foreground/30">
                 <Link to="/contact">Contact Us</Link>
               </Button>
-
             </div>
           </div>
         </div>

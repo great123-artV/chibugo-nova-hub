@@ -11,6 +11,7 @@ import { Upload, Video, Download, Loader2, Play, Settings, Droplet, Film, Scalin
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
+import { VideoCategorizationDialog } from "@/components/video/VideoCategorizationDialog";
 
 export default function VideoEditor() {
   const [file, setFile] = useState<File | null>(null);
@@ -121,6 +122,11 @@ export default function VideoEditor() {
 
       setJobStatus("Invoking processing function...");
 
+      // Get the public URL for the video immediately
+      const { data: { publicUrl } } = supabase.storage
+        .from("videos")
+        .getPublicUrl(videoPath);
+
       const { data, error: invokeError } = await supabase.functions.invoke("process-video", {
         body: {
           action: 'start-processing', // Explicit action
@@ -139,7 +145,7 @@ export default function VideoEditor() {
       if (invokeError) throw invokeError;
 
       setJobStatus("Processing started. Please wait.");
-      pollJobStatus(data.jobId);
+      pollJobStatus(publicUrl);
 
     } catch (error: any) {
       console.error("Error:", error);
@@ -148,15 +154,35 @@ export default function VideoEditor() {
     }
   };
 
-  const pollJobStatus = async (jobId: string) => {
+  const pollJobStatus = async (processedUrl: string) => {
     // Simplified polling - in production this would check actual job status
     setTimeout(() => {
       setJobStatus("completed");
       toast.success("Processing complete!");
       setIsProcessing(false);
+      
+      // Mock processed file for UI flow
+      const mockProcessedFile = {
+        path: "processed/video.mp4",
+        format: "mp4",
+        resolution: "1080p",
+        size: 15000000,
+        url: processedUrl, // Use the persistent Supabase URL
+      };
+      
+      setProcessedFiles([mockProcessedFile]);
+      
+      // Auto-open categorization dialog
+      setLatestVideoUrl(processedUrl);
+      setShowCategorizationDialog(true);
+
     }, 3000);
   };
   const [loading, setLoading] = useState(true);
+  
+  // Categorization State
+  const [showCategorizationDialog, setShowCategorizationDialog] = useState(false);
+  const [latestVideoUrl, setLatestVideoUrl] = useState("");
 
   useEffect(() => {
     checkAuth();
@@ -348,7 +374,12 @@ export default function VideoEditor() {
               </CardContent>
             </Card>
           )}
-        </div>
+
+        <VideoCategorizationDialog 
+          isOpen={showCategorizationDialog} 
+          onOpenChange={setShowCategorizationDialog} 
+          videoUrl={latestVideoUrl} 
+        />
     </div>
   );
 }
