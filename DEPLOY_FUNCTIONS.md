@@ -41,7 +41,7 @@ If it asks "Do you want to update config.toml?", say **yes**.
 The chatbot needs an API key to work. Run this command (replacing `YOUR_KEY` with your actual key):
 
 ```bash
-npx supabase secrets set LOVABLE_API_KEY=your_actual_api_key_here --project-ref sgmsjdvrsbnygrpanjqy
+npx supabase secrets set GEMINI_API_KEY=your_actual_api_key_here --project-ref sgmsjdvrsbnygrpanjqy
 ```
 
 ## Troubleshooting

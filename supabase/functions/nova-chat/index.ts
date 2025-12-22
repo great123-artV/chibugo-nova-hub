@@ -77,7 +77,7 @@ BEHAVIOR:
 
     const finalSystemPrompt = systemPrompt + inventoryContext;
 
-    // 4. Call Google Gemini API
+    // 4. Call Google Gemini API (with fallback)
     // Using gemini-1.5-flash for stability and speed
     const geminiContent = [
       { role: "user", parts: [{ text: finalSystemPrompt }] },
@@ -88,31 +88,50 @@ BEHAVIOR:
       }))
     ];
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: geminiContent,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500,
-          },
-        }),
-      }
-    );
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash"];
+    let lastError: any = null;
+    let reply = "";
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    for (const model of modelsToTry) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: geminiContent,
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 500,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Gemini API Error (${model}):`, errorText);
+          lastError = errorText;
+          continue; // Try next model
+        }
+
+        const data = await response.json();
+        reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (reply) break; // Success
+
+      } catch (error) {
+        console.error(`Network/System Error (${model}):`, error);
+        lastError = error.message;
+      }
+    }
+
+    if (!reply) {
       return new Response(
-        JSON.stringify({ message: "I'm having trouble connecting to my brain right now. Please try again later." }),
+        JSON.stringify({ message: `I'm having trouble connecting to my brain right now. Error details: ${lastError}` }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having trouble thinking right now.";
 
     return new Response(
       JSON.stringify({ message: reply }),
