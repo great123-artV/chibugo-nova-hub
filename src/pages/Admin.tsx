@@ -24,6 +24,7 @@ import PropertiesManager from "@/components/admin/PropertiesManager";
 import VideosManager from "@/components/admin/VideosManager";
 import InquiriesManager from "@/components/admin/InquiriesManager";
 import DashboardOverview from "@/components/admin/DashboardOverview";
+import { allowedEmails } from "@/lib/constants";
 
 const menuItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
@@ -88,14 +89,9 @@ const Admin = () => {
         return;
       }
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      const userEmail = session.user.email;
 
-      if (!roles) {
+      if (!userEmail || !allowedEmails.includes(userEmail)) {
         toast({
           variant: "destructive",
           title: "Access Denied",
